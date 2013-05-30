@@ -21,8 +21,8 @@ Draggable currentDraggable;
  * 
  * ## Internet Explorer 9 ##
  * To enable Drag and Drop of elements other than links and images in Internet
- * Explorer 9 we need an (ugly) workaround. The javascript file called 
- * 'dragdrop.ie9.js' must be added to the header of the application html.
+ * Explorer 9 we need a workaround. The javascript file called 'dragdrop.ie9.js' 
+ * must be added to the header of the application html.
  * 
  * TODO: Remove IE9 workaround when 
  * [Bug 10837](https://code.google.com/p/dart/issues/detail?id=10837) is fixed.
