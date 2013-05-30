@@ -1,0 +1,12 @@
+name: html5_drag_and_drop
+version: 0.0.1
+author: Marco Jakob <majakob@gmx.ch>
+description: HTML5 Drag and Drop
+homepage: https://github.com/marcojakob/dart-html5-drag-and-drop
+dependencies:
+  js: any
+  meta: any
+  logging: any
+dev_dependencies:
+  browser: any
+  logging_handlers: any
