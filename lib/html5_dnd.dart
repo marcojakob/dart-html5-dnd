@@ -1,5 +1,5 @@
 /**
- * Helper library for native HTML5 drag and drop. There are [Draggable] elements 
+ * Helper library for native HTML5 Drag and Drop. There are [Draggable] elements 
  * that can be dropped inside [Dropzone] elements. 
  */
 library html5_dnd;
@@ -22,7 +22,7 @@ bool _hasIE9Workaround = false;
  * Class for making an [Element] draggable.
  * 
  * ## Internet Explorer 9 ##
- * To enable drag-and-drop of elements other than links and images in Internet
+ * To enable Drag and Drop of elements other than links and images in Internet
  * Explorer 9 we need an (ugly) workaround. The javascript file called 
  * 'dragdrop.ie9.js' must be added to the header of the application html.
  * 
@@ -217,7 +217,7 @@ class Draggable {
   }
   
   /**
-   * Workaround to enable drag-and-drop of elements other than links and images 
+   * Workaround to enable Drag and Drop of elements other than links and images 
    * in Internet Explorer 9.
    */
   void _enableIE9drag() {

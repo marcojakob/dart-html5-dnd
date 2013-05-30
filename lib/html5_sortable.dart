@@ -1,3 +1,7 @@
+/**
+ * Helper library for reordering of HTML elements with native HTML5 Drag and
+ * Drop.
+ */
 library html5_sortable;
 
 import 'dart:html';
@@ -48,7 +52,7 @@ class Sortable {
   // Private
   // -------------------
   /// The placeholder for the draggable element.
-  Placeholder _placeholder;
+  _Placeholder _placeholder;
   
   /// Position of the draggable element before dragging.
   Position _originalPosition;
@@ -81,7 +85,7 @@ class Sortable {
       // Test if it might be a grid with floats.
       if (!_isGrid 
           && _floatRegExp.hasMatch(sortableElement.getComputedStyle().float)) {
-        _logger.finest('Sortable: floating element detected --> handle as grid');
+        _logger.finest('floating element detected --> handle as grid');
         _isGrid = true;
       }
       
@@ -99,11 +103,11 @@ class Sortable {
     ..dropEffect = 'move'
     
     ..onDragStart.listen((DraggableEvent event) {
-      _logger.finest('Sortable: onDragStart');
+      _logger.finest('onDragStart');
       
       _originalPosition = new Position(currentDraggable.element.parent,
           getElementIndexInParent(currentDraggable.element));
-      _placeholder = new Placeholder(event.draggable.element, placeholderClass, 
+      _placeholder = new _Placeholder(event.draggable.element, placeholderClass, 
           forcePlaceholderSize);
       _placeholder.onDrop.listen((_) {
         _showDraggable(_placeholder.placeholderPosition);
@@ -111,7 +115,7 @@ class Sortable {
     })
     
     ..onDragEnd.listen((DraggableEvent event) {
-      _logger.finest('Sortable: onDragEnd');
+      _logger.finest('onDragEnd');
       if (!_dropped) {
         // Not dropped. This means the drag ended outside of a placeholder or
         // the drag was cancelled somehow (ESC-key, ...)
@@ -133,10 +137,11 @@ class Sortable {
     Dropzone dropzone = new Dropzone(sortableElement);
     
     // Save the subscription for onDragOver so we can pause and resume it.
-    StreamSubscription overSubscription = dropzone.onDragOver.listen((DropzoneEvent event) {
+    StreamSubscription overSubscription = 
+        dropzone.onDragOver.listen((DropzoneEvent event) {
       // Return if drag is not from this sortable.
       if (_placeholder == null) return;
-      _logger.finest('Sortable: onDragOver');
+      _logger.finest('onDragOver');
       
       _placeholder.showPlaceholderForBiggerDropzone(dropzone, event.mouseEvent, 
           _isGrid);
@@ -151,17 +156,17 @@ class Sortable {
     ..onDragEnter.listen((DropzoneEvent event) {
       // Return if drag is not from this sortable.
       if (_placeholder == null) return;
-      _logger.finest('Sortable: onDragEnter');
+      _logger.finest('onDragEnter');
       
       if (_placeholder.isDropzoneHigher(event.dropzone)) {
-        _logger.finest('Sortable: dropzone is higher than placeholder, resuming onDragOver events');
+        _logger.finest('dropzone is higher than placeholder, resuming onDragOver events');
         overSubscription.resume();
       } else if (_isGrid && _placeholder.isDropzoneWider(event.dropzone)) {
-        _logger.finest('Sortable: dropzone is wider than placeholder, resuming onDragOver events');
+        _logger.finest('dropzone is wider than placeholder, resuming onDragOver events');
         overSubscription.resume();
       } else {
         _placeholder.showPlaceholder(event.dropzone);
-        _logger.finest('Sortable: dropzone is not bigger than placeholder, pausing onDragOver events');
+        _logger.finest('dropzone is not bigger than placeholder, pausing onDragOver events');
         if (!overSubscription.isPaused) {
           overSubscription.pause();
         }
@@ -169,7 +174,7 @@ class Sortable {
     })
     
     ..onDrop.listen((DropzoneEvent event) {
-      _logger.finest('Sortable: dropzone onDrop');
+      _logger.finest('dropzone onDrop');
       _showDraggable(_placeholder.placeholderPosition);
     });
   }
@@ -181,7 +186,7 @@ class Sortable {
     
     // Fire sortable complete event
     if (newPosition != _originalPosition) {
-      _logger.finest('Sortable: firing onSortableComplete event');
+      _logger.finest('firing onSortableComplete event');
       
       if (_onSortableComplete.hasListener 
         && !_onSortableComplete.isClosed
@@ -193,21 +198,21 @@ class Sortable {
   }
 }
 
-class Placeholder {
+class _Placeholder {
   Element placeholderElement;
   
   /// Position of the placeholder.
   Position placeholderPosition;
   
   /// Fired when a drag element has been dropped in this placeholder.
-  Stream<Placeholder> get onDrop => _onDrop.stream;
+  Stream<_Placeholder> get onDrop => _onDrop.stream;
   
-  StreamController<Placeholder> _onDrop = new StreamController<Placeholder>();
+  StreamController<_Placeholder> _onDrop = new StreamController<_Placeholder>();
   
   /**
    * Creates a new placeholder for the specified [draggableElement].
    */
-  Placeholder(Element draggableElement, String placeholderClass, 
+  _Placeholder(Element draggableElement, String placeholderClass, 
       bool forcePlaceholderSize) {
     placeholderElement = new Element.tag(draggableElement.tagName);
     if (placeholderClass != null) {
@@ -228,7 +233,7 @@ class Placeholder {
     }
     
     ..onDrop.listen((DropzoneEvent event) {
-      _logger.finest('Sortable: placeholder onDrop');
+      _logger.finest('placeholder onDrop');
       _onDrop.add(this);
     });
   }
@@ -265,7 +270,7 @@ class Placeholder {
    * Shows the placeholder at the position of [dropzone].
    */
   void showPlaceholder(Dropzone dropzone) {
-    _logger.finest('Sortable: showPlaceholder');
+    _logger.finest('showPlaceholder');
     Position dropzonePosition = new Position(dropzone.element.parent,
         getElementIndexInParent(dropzone.element));
     
@@ -300,7 +305,7 @@ class Placeholder {
   void _doShowPlaceholder(Dropzone dropzone, Position dropzonePosition) {
     // Show placeholder at the position of dropzone.
     placeholderPosition = dropzonePosition;
-    _logger.finest('Sortable: showing placeholder at index ${placeholderPosition.index}');
+    _logger.finest('showing placeholder at index ${placeholderPosition.index}');
     placeholderElement.remove(); // Might already be at a different position.
     placeholderPosition.insert(placeholderElement);
     
@@ -312,7 +317,12 @@ class Placeholder {
     dropzone.resetDragOverElements();
   }
   
-  bool _isInDisabledVerticalRegion(Dropzone dropzone, Position dropzonePosition, MouseEvent event) {
+  /**
+   * Returns true if the mouse is in the disabled vertical region of the 
+   * dropzone.
+   */
+  bool _isInDisabledVerticalRegion(Dropzone dropzone, Position dropzonePosition, 
+                                   MouseEvent event) {
     if (placeholderPosition != null && placeholderPosition > dropzonePosition) {
       // Current placeholder position is after the new dropzone position.
       // --> Disabled region is in the bottom part of the dropzone.
@@ -326,7 +336,12 @@ class Placeholder {
     return false;
   }
   
-  bool _isInDisabledHorizontalRegion(Dropzone dropzone, Position dropzonePosition, MouseEvent event) {
+  /**
+   * Returns true if the mouse is in the disabled horizontal region of the 
+   * dropzone. This check is only necessary for grids.
+   */
+  bool _isInDisabledHorizontalRegion(Dropzone dropzone, Position dropzonePosition, 
+                                     MouseEvent event) {
     // Calc the mouse position relative to the dropzone.
     num mouseRelativeLeft = event.page.x - _getLeftOffset(dropzone.element);      
     
