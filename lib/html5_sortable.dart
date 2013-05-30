@@ -81,8 +81,6 @@ class Sortable {
    * the specified subelement of [element].
    */
   Sortable(this.sortableElements, {String handle: null}) {
-    Set<Draggable> acceptDraggables = new Set<Draggable>();
-    
     // Sortable elements are at the same time draggables and dropzones
     for (Element sortableElement in sortableElements) {
       // Test if it might be a grid with floats.
@@ -92,20 +90,17 @@ class Sortable {
         _isGrid = true;
       }
       
-      acceptDraggables.add(_createDraggable(sortableElement, handle));
-    }
-    
-    // Create dropzones with draggables as acceptDraggables.
-    for (Element sortableElement in sortableElements) {
-      _createDropzone(sortableElement, acceptDraggables);
+      _installDraggable(sortableElement, handle);
+      // Create dropzones with all sortableElements as acceptDraggables.
+      _installDropzone(sortableElement, sortableElements);
     }
   }
   
   /**
    * Installs drag events for the [sortableElement].
    */
-  Draggable _createDraggable(Element sortableElement, String handle) {
-   return  new Draggable(sortableElement, handle: handle)
+  void _installDraggable(Element sortableElement, String handle) {
+   new Draggable(sortableElement, handle: handle)
     ..dropEffect = 'move'
     
     ..onDragStart.listen((DraggableEvent event) {
@@ -139,11 +134,11 @@ class Sortable {
   /**
    * Installs dropzone events for the [sortableElement].
    */
-  Dropzone _createDropzone(Element sortableElement, 
-                           Set<Draggable> acceptDraggables) {
+  void _installDropzone(Element sortableElement, 
+                           List<Element> acceptDraggables) {
     Dropzone dropzone = new Dropzone(sortableElement)
     ..overClass = null
-    ..acceptDraggables = acceptDraggables;
+    ..acceptDraggables.addAll(acceptDraggables);
     
     // Save the subscription for onDragOver so we can pause and resume it.
     StreamSubscription overSubscription = dropzone.onDragOver.listen((DropzoneEvent event) {
@@ -181,8 +176,6 @@ class Sortable {
       _logger.finest('dropzone onDrop');
       _showDraggable(_placeholder.placeholderPosition);
     });
-    
-    return dropzone;
   }
   
   void _showDraggable(Position newPosition) {

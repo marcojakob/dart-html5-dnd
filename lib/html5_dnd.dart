@@ -138,13 +138,9 @@ class Draggable {
       _logger.finest('onDragStart');
       // In Firefox it is possible to start selection outside of a draggable,
       // then drag entire selection. This leads to strange behavior, so we 
-      // deactivate it here.
-      if (mouseEvent.dataTransfer.types != null 
-          && !mouseEvent.dataTransfer.types.isEmpty) {
-        _logger.finest('already has data in dataTransfer, removing selection and returning');
-        mouseEvent.preventDefault();
+      // deactivate selection here.
+      if (window.getSelection().rangeCount > 0) {
         window.getSelection().removeAllRanges();
-        return;
       }
       
       isHandle = false;
@@ -152,7 +148,11 @@ class Draggable {
       
       // Add CSS classes
       if (draggingClass != null) {
-        _addCssClass(element, draggingClass);
+        // Defer adding the dragging class until the end of the event loop.
+        // This makes sure that the style is not applied to the drag image.
+        Timer.run(() {
+          _addCssClass(element, draggingClass);
+        });
       }
       if (dragOccurringClass != null) {
         _addCssClass(document.body, dragOccurringClass);
@@ -186,6 +186,9 @@ class Draggable {
     
     // Drag.
     element.onDrag.listen((MouseEvent mouseEvent) {
+      // Do nothing if no element of this dnd is dragged.
+      if (currentDraggable == null || disabled) return;
+      
       // Just forward.
       if (_onDrag.hasListener && !_onDrag.isPaused 
           && !_onDrag.isClosed) {
@@ -195,6 +198,8 @@ class Draggable {
     
     // Drag End.
     element.onDragEnd.listen((MouseEvent mouseEvent) {
+      // Do nothing if no element of this dnd is dragged.
+      if (currentDraggable == null || disabled) return;
       _logger.finest('onDragEnd');
       
       // Remove CSS classes.
@@ -267,10 +272,10 @@ class Dropzone {
   bool disabled = false;
   
   /**
-   * List of all [Draggable]s that this dropzone accepts. 
+   * List of all [Draggable] elements that this dropzone accepts. 
    * If the list is empty, all draggables are accepted.
    */
-  Set<Draggable> acceptDraggables = new Set<Draggable>();
+  Set<Element> acceptDraggables = new Set<Element>();
   
   // ----------
   // Events
@@ -334,7 +339,8 @@ class Dropzone {
       // Only handle dropzone element itself and not any of its children.
       if (_dragOverElements.length == 1) {
         // Test if this dropzone accepts the drop of the current draggable.
-        dropAccept = acceptDraggables.isEmpty || acceptDraggables.contains(currentDraggable);
+        dropAccept = acceptDraggables.isEmpty 
+            || acceptDraggables.contains(currentDraggable.element);
         if (dropAccept) {
           mouseEvent.dataTransfer.dropEffect = currentDraggable.dropEffect;
         } else {
@@ -406,10 +412,8 @@ class Dropzone {
       if (currentDraggable == null || disabled) return;
       _logger.finest('onDrop');
       
-      // There is a weird effect in ie9 if we preventDefault: select a non-dnd 
-      // element and a dnd element, then drag, the non-dnd element disappears!
-      // TODO: do we need to prevent default for any other browser?
-      // mouseEvent.preventDefault(); // Stops some browsers from redirecting.
+      // Stops browsers from redirecting.
+      mouseEvent.preventDefault(); 
       
       if (overClass != null) {
         _removeCssClass(element, overClass);
