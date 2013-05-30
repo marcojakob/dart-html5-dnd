@@ -1,8 +1,8 @@
-name: html5_drag_and_drop
+name: html5_dnd
 version: 0.0.1
 author: Marco Jakob <majakob@gmx.ch>
 description: HTML5 Drag and Drop
-homepage: https://github.com/marcojakob/dart-html5-drag-and-drop
+homepage: https://github.com/marcojakob/dart-html5-dnd
 dependencies:
   js: any
   meta: any

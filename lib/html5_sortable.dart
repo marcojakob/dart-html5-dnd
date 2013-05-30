@@ -1,4 +1,12 @@
-part of drag_and_drop;
+library html5_sortable;
+
+import 'dart:html';
+import 'dart:async';
+import 'package:meta/meta.dart';
+import 'package:logging/logging.dart';
+import 'package:html5_dnd/html5_dnd.dart';
+
+final _logger = new Logger("html5_sortable");
 
 /**
  * Drag and Drop for reordering elements.

@@ -2,7 +2,7 @@
  * Helper library for native HTML5 drag and drop. There are [Draggable] elements 
  * that can be dropped inside [Dropzone] elements. 
  */
-library drag_and_drop;
+library html5_dnd;
 
 import 'dart:html';
 import 'dart:async';
@@ -11,9 +11,7 @@ import 'package:meta/meta.dart';
 import 'package:js/js.dart' as js;
 import 'package:logging/logging.dart';
 
-part 'sortable.dart';
-
-final _logger = new Logger("drag_and_drop");
+final _logger = new Logger("html5_dnd");
 
 /// Currently dragged element.
 Draggable currentDraggable;
