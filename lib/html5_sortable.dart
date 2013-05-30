@@ -81,6 +81,9 @@ class Sortable {
    * the specified subelement of [element].
    */
   Sortable(this.sortableElements, {String handle: null}) {
+    Set<Draggable> acceptDraggables = new Set<Draggable>();
+    
+    // Sortable elements are at the same time draggables and dropzones
     for (Element sortableElement in sortableElements) {
       // Test if it might be a grid with floats.
       if (!_isGrid 
@@ -89,17 +92,20 @@ class Sortable {
         _isGrid = true;
       }
       
-      // Sortable elements are at the same time draggables and dropzones
-      _installDraggable(sortableElement, handle);
-      _installDropzone(sortableElement);
+      acceptDraggables.add(_createDraggable(sortableElement, handle));
+    }
+    
+    // Create dropzones with draggables as acceptDraggables.
+    for (Element sortableElement in sortableElements) {
+      _createDropzone(sortableElement, acceptDraggables);
     }
   }
   
   /**
    * Installs drag events for the [sortableElement].
    */
-  void _installDraggable(Element sortableElement, String handle) {
-    new Draggable(sortableElement, handle: handle)
+  Draggable _createDraggable(Element sortableElement, String handle) {
+   return  new Draggable(sortableElement, handle: handle)
     ..dropEffect = 'move'
     
     ..onDragStart.listen((DraggableEvent event) {
@@ -133,12 +139,14 @@ class Sortable {
   /**
    * Installs dropzone events for the [sortableElement].
    */
-  void _installDropzone(Element sortableElement) {
-    Dropzone dropzone = new Dropzone(sortableElement);
+  Dropzone _createDropzone(Element sortableElement, 
+                           Set<Draggable> acceptDraggables) {
+    Dropzone dropzone = new Dropzone(sortableElement)
+    ..overClass = null
+    ..acceptDraggables = acceptDraggables;
     
     // Save the subscription for onDragOver so we can pause and resume it.
-    StreamSubscription overSubscription = 
-        dropzone.onDragOver.listen((DropzoneEvent event) {
+    StreamSubscription overSubscription = dropzone.onDragOver.listen((DropzoneEvent event) {
       // Return if drag is not from this sortable.
       if (_placeholder == null) return;
       _logger.finest('onDragOver');
@@ -147,13 +155,7 @@ class Sortable {
           _isGrid);
     }); // start in paused state
 
-    dropzone
-    ..overClass = null
-    ..dropAcceptFunction = (Draggable draggable, Dropzone dropzone) {
-      return true;
-    }
-    
-    ..onDragEnter.listen((DropzoneEvent event) {
+    dropzone.onDragEnter.listen((DropzoneEvent event) {
       // Return if drag is not from this sortable.
       if (_placeholder == null) return;
       _logger.finest('onDragEnter');
@@ -171,12 +173,16 @@ class Sortable {
           overSubscription.pause();
         }
       }
-    })
+    });
     
-    ..onDrop.listen((DropzoneEvent event) {
+    dropzone.onDrop.listen((DropzoneEvent event) {
+      // Return if drag is not from this sortable.
+      if (_placeholder == null) return;
       _logger.finest('dropzone onDrop');
       _showDraggable(_placeholder.placeholderPosition);
     });
+    
+    return dropzone;
   }
   
   void _showDraggable(Position newPosition) {
@@ -228,22 +234,11 @@ class _Placeholder {
     // Make the placeholder to a dropzone so we can drop inside.
     new Dropzone(placeholderElement)
     ..overClass = null
-    ..dropAcceptFunction = (Draggable draggable, Dropzone dropzone) {
-      return true;
-    }
     
     ..onDrop.listen((DropzoneEvent event) {
       _logger.finest('placeholder onDrop');
       _onDrop.add(this);
     });
-  }
-  
-  /**
-   * Sets the new position of this placeholder to the position of the provided
-   * [dropzone].
-   */
-  void newPosition(Dropzone dropzone) {
-    
   }
   
   /**

@@ -16,8 +16,6 @@ final _logger = new Logger("html5_dnd");
 /// Currently dragged element.
 Draggable currentDraggable;
 
-bool _hasIE9Workaround = false;
-
 /**
  * Class for making an [Element] draggable.
  * 
@@ -225,8 +223,6 @@ class Draggable {
       // HTML5 draggable support is not available --> try to use workaround.
       _logger.finest('Draggable is null, installing IE9 dragDrop() workaround');
       
-      _hasIE9Workaround = true;
-      
       element.onSelectStart.listen((MouseEvent mouseEvent) {
         if (disabled) return;
         _logger.finest('IE9 Workaround: onSelectStart');
@@ -241,7 +237,8 @@ class Draggable {
           _logger.severe('JavaScript method "callDragDrop" not found. Please' 
               + ' load the file "dragdrop.ie9.js" with your application html.');
         } catch(e) {
-          _logger.severe('Calling dragDrop() as a workaround for IE9 failed: ' + e.toString());
+          _logger.severe('Calling dragDrop() as a workaround for IE9 failed: ' 
+              + e.toString());
         }
       });
     }
@@ -270,13 +267,10 @@ class Dropzone {
   bool disabled = false;
   
   /**
-   * Function to define whether a drop of the draggable inside this dropzone
-   * should be accepted. 
-   * Default is true.
+   * List of all [Draggable]s that this dropzone accepts. 
+   * If the list is empty, all draggables are accepted.
    */
-  DropAcceptFunction dropAcceptFunction = (Draggable draggable, Dropzone dropzone) {
-    return true;
-  };
+  Set<Draggable> acceptDraggables = new Set<Draggable>();
   
   // ----------
   // Events
@@ -331,22 +325,23 @@ class Dropzone {
       // Do nothing if no element of this dnd is dragged.
       if (currentDraggable == null || disabled) return;
       
-      // This is necessary for IE.
+      // Necessary for IE?
       mouseEvent.preventDefault();
-      
-      // Test if this draggable accepts the drop.
-      dropAccept = dropAcceptFunction(currentDraggable, this);
-      if (dropAccept) {
-        mouseEvent.dataTransfer.dropEffect = currentDraggable.dropEffect;
-      } else {
-        mouseEvent.dataTransfer.dropEffect = 'none';
-      }
       
       _dragOverElements.add(mouseEvent.target);
       _logger.finest('onDragEnter {dragOverElements.length: ${_dragOverElements.length}}');
       
       // Only handle dropzone element itself and not any of its children.
       if (_dragOverElements.length == 1) {
+        // Test if this dropzone accepts the drop of the current draggable.
+        dropAccept = acceptDraggables.isEmpty || acceptDraggables.contains(currentDraggable);
+        if (dropAccept) {
+          mouseEvent.dataTransfer.dropEffect = currentDraggable.dropEffect;
+        } else {
+          mouseEvent.dataTransfer.dropEffect = 'none';
+          return; // Return here as drop is not accepted.
+        }
+        
         if (overClass != null) {
           _addCssClass(element, overClass);
         }
@@ -363,15 +358,16 @@ class Dropzone {
       // Do nothing if no element of this dnd is dragged.
       if (currentDraggable == null || disabled) return;
       
-      // This is necessary to allow us to drop.
-      mouseEvent.preventDefault();
-      
       if (dropAccept) {
         mouseEvent.dataTransfer.dropEffect = currentDraggable.dropEffect;
       } else {
         mouseEvent.dataTransfer.dropEffect = 'none';
+        return; // Return here as drop is not accepted.
       }
 
+      // This is necessary to allow us to drop.
+      mouseEvent.preventDefault();
+      
       if (_onDragOver.hasListener && !_onDragOver.isPaused 
           && !_onDragOver.isClosed) {
         _onDragOver.add(new DropzoneEvent(currentDraggable, this, mouseEvent));
@@ -439,12 +435,9 @@ class Dropzone {
   }
 }
 
-
 typedef Map<String, String> DragDataFunction(Draggable draggable);
 
 typedef DragImage DragImageFunction(Draggable draggable);
-
-typedef bool DropAcceptFunction(Draggable draggable, Dropzone dropzone);
 
 /**
  * Event for [Draggable]s.
