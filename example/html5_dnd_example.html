@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Dart HTML5 Drag and Drop</title>
+  
+  <link rel="stylesheet" href="html5_dnd_example.css">
+  
+  <!-- Script to make HTML5 drag and drop work in IE9 on elements other links and images -->
+  <script type="text/javascript" src="packages/html5_dnd/dnd.polyfill.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Dart HTML5 Drag and Drop</h1>
+  </header>
+  <article>
+    <div id="intro">
+      <p>
+        Native HTML5 Drag and Drop is <a href="http://www.quirksmode.org/blog/archives/2009/09/the_html5_drag.html">
+        not easy to work with</a>! The 
+        <a href="https://github.com/marcojakob/dart-html5-dnd">Dart HTML5 Drag 
+        and Drop</a> library was created to make Drag and Drop fun again 
+        (hopefully). Here are some examples of how to use it.
+      </p>
+      <p>
+        API and Examples are inspired by 
+        <ul>
+          <li>
+            <a href="http://farhadi.ir/projects/html5sortable/">HTML5 Sortable</a> (thank you, Ali Farhadi!)
+          </li>
+          <li>
+            jQuery UI: <a href="http://api.jqueryui.com/draggable/">Draggable</a>, 
+            <a href="http://api.jqueryui.com/droppable/">Droppable</a> and 
+            <a href="http://api.jqueryui.com/sortable/">Sortable</a>
+          </li>
+        </ul>
+      </p>
+      <p>
+        For <strong>installation instructions, download and source code</strong> 
+        see <a href="https://github.com/marcojakob/dart-html5-dnd">Dart HTML5 
+        Drag and Drop</a> on GitHub.
+      </p>
+    </div>
+    
+    <h2>Draggable and Dropzone</h2>
+    <p>
+      Drag the documents over the trash, and drop them.
+    </p>
+    <div id="draggable-dropzone" class="example-container">
+      <div class="trash"></div>
+      <img class="document" src="icons/document.png">
+      <img class="document" src="icons/document.png">
+      <img class="document" src="icons/document.png">
+      <img class="document" src="icons/document.png">
+    </div>
+    
+    <h2>Dragging Divs</h2>
+    <p>
+      All HTML elements with the `draggable="true"` attribute can be dragged - 
+      well...almost. Internet Explorer 9 does not support this attribute and 
+      thus by default only links and images are draggable in IE9. With a decent
+      <a href="http://stackoverflow.com/a/8986075/862411">workaround</a>, we 
+      can also tell IE9 to drag anything. Try the following example in IE9.
+    </p>
+    <p>
+      <strong>Note:</strong> The `draggable="true"` attribute is automatically
+      added by the `Draggable` class, so there is no need to set it in HTML.
+    </p>
+    <div id="dragging-divs" class="example-container">
+      <div class="dragme">
+        Drag me!  
+      </div>
+      <div class="dropzone example-box">
+        Drag here!
+      </div>
+    </div>
+    
+    <h2>Drop Effects</h2>
+    <p>
+      The drop effect controls the feedback that is given when hovering over 
+      the target element. The browser's cursor can take on one of the following
+      forms: 'move', 'copy', 'link', and 'none'. If 'none' is used, dropping 
+      on the target is not possible.
+    </p>
+    <div id="drop-effects" class="example-container">
+      <div class="trash"></div>
+      <a href="#" class="move">move</a>
+      <a href="#" class="copy">copy</a>
+      <a href="#" class="link">link</a>
+      <a href="#" class="none">none</a>
+    </div>
+    
+    <h2>Custom Drag Images</h2>
+    <p>
+      That was a tough one to make work cross-browser! IE9 and IE10 do not 
+      support setting a custom drag image (as other modern browsers do). IE 
+      always creates a drag image from the element that the user picks up. 
+    </p>
+    <p>
+      So I had to implement a <strong>polyfill</strong> that draws a custom 
+      image and moves it around with the mouse (like jQuery and others do). The 
+      movement is not as smooth as with the native implementation but works 
+      quite well. (If you're curious how the polyfill works: 1. make sure the 
+      default image does not show, 2. draw the custom image, 3. ensure the mouse 
+      events are passed through to the layer underneath the drag image... more 
+      info in the source).
+    </p>
+    <p>
+      <strong>Note:</strong> The polyfill for drag images is automatically used
+      if the browser does not support it. But you can use the polyfill for any
+      browser by setting `alwaysUseDragImagePolyfill = true` on the `Draggable`.
+    </p>      
+    <div id="drag-images" class="example-container">
+      <div class="dropzone example-box">
+        Drag here!
+      </div>
+      <div class="dragme one">
+        png at position [40,40]
+      </div>
+      <div class="dragme two">
+        png at position [-20,-20]
+      </div>
+      <div class="dragme three">
+        custom drawn canvas
+      </div>
+      <div class="dragme four">
+        Always uses Polyfill
+      </div>
+    </div>
+    
+    <h2>Dropping on Nested Elements</h2>
+    <p>
+      In its original form, HTML5 dragEnter and dragLeave events of an 
+      element also fire when dragging over a child element. This makes it very 
+      hard to distinguish important events from unimportant ones. The dart 
+      html5_dnd library ensures that only the relevant events (entering or 
+      leaving the main element) are fired.
+    </p>
+    <div id="nested-elements" class="example-container">
+      <div class="dragme">
+        Drag me!  
+      </div>
+      
+      <div class="dropzone example-box">
+        <div>
+          <input value="Drag here!"></input>
+          <textarea rows="5"></textarea>
+          <button>Button</button>
+        </div>
+      </div>
+    </div>
+    
+    <h2>Sortable List</h2>
+    <p>
+      Reorder Elements. Notice the behaviour when dragging a smaller element
+      over a bigger element.
+    </p>
+    <div id="sortable-list" class="example-container">
+      <ul class="example-box">
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+        <li class="higher">Item 4</li>
+        <li>Item 5</li>
+        <li class="higher">Item 6</li>
+      </ul>
+    </div>
+    
+    <h2>Sortable Grid</h2>
+    <p>
+      Grid behaviour is applied when elements are floated.
+    </p>
+    <div id="sortable-grid" class="example-container">
+      <ul class="example-box grid">
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+        <li>Item 4</li>
+        <li class="wider">Item 5</li>
+        <li>Item 6</li>
+        <li class="higher">Item 7</li>
+        <li>Item 8</li>
+      </ul>
+    </div>
+    
+    <h2>Exclude Items</h2>
+    <p>
+      Exclude elements from beeing sortable.
+    </p>
+    <div id="sortable-list-exclude" class="example-container">
+      <ul class="example-box">
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+        <li class="disabled">Item 4</li>
+        <li class="disabled">Item 5</li>
+        <li class="disabled">Item 6</li>
+      </ul>
+    </div>
+    
+    <h2>Sortable List With Handles</h2>
+    <p>
+      Items can only be dragged with the handle.
+    </p>
+    <div id="sortable-list-handles" class="example-container">
+      <ul class="example-box">
+        <li><span>::</span> Item 1</li>
+        <li><span>::</span> Item 2</li>
+        <li><span>::</span> Item 3</li>
+        <li><span>::</span> Item 4</li>
+        <li><span>::</span> Item 5</li>
+        <li><span>::</span> Item 6</li>
+      </ul>
+    </div>
+    
+    <h2>Connected Sortable Lists</h2>
+    <p>
+      Two connected lists.      
+    </p>
+    <div id="sortable-list-connected" class="example-container">
+      <ul class="example-box list1">
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+        <li>Item 4</li>
+        <li>Item 5</li>
+        <li>Item 6</li>
+      </ul>
+      <ul class="example-box list2">
+        <li class="other">Item 1</li>
+        <li class="other">Item 2</li>
+        <li class="other">Item 3</li>
+        <li class="other">Item 4</li>
+        <li class="other">Item 5</li>
+        <li class="other">Item 6</li>
+      </ul>
+    </div>
+    
+    <script type="application/dart" src="html5_dnd_example.dart"></script>
+    <script src="packages/browser/dart.js"></script>
+  </article>
+</body>
+</html>
