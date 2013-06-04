@@ -10,6 +10,9 @@ import 'package:meta/meta.dart';
 import 'package:logging/logging.dart';
 import 'package:html5_dnd/html5_dnd.dart';
 
+import 'package:html5_dnd/src/css_utils.dart' as css;
+import 'package:html5_dnd/src/html5_utils.dart' as html5;
+
 final _logger = new Logger("html5_sortable");
 
 /**
@@ -107,7 +110,7 @@ class Sortable {
       _logger.finest('onDragStart');
       
       _originalPosition = new Position(currentDraggable.element.parent,
-          getElementIndexInParent(currentDraggable.element));
+          html5.getElementIndexInParent(currentDraggable.element));
       _placeholder = new _Placeholder(event.draggable.element, placeholderClass, 
           forcePlaceholderSize);
       _placeholder.onDrop.listen((_) {
@@ -260,7 +263,7 @@ class _Placeholder {
   void showPlaceholder(Dropzone dropzone) {
     _logger.finest('showPlaceholder');
     Position dropzonePosition = new Position(dropzone.element.parent,
-        getElementIndexInParent(dropzone.element));
+        html5.getElementIndexInParent(dropzone.element));
     
     _doShowPlaceholder(dropzone, dropzonePosition);
   }
@@ -272,7 +275,7 @@ class _Placeholder {
   void showPlaceholderForBiggerDropzone(Dropzone dropzone, MouseEvent event, 
                                         bool isGrid) {
     Position dropzonePosition = new Position(dropzone.element.parent,
-        getElementIndexInParent(dropzone.element));
+        html5.getElementIndexInParent(dropzone.element));
     
     if (isDropzoneHigher(dropzone)) {
       if (_isInDisabledVerticalRegion(dropzone, dropzonePosition, event)) {
@@ -316,7 +319,7 @@ class _Placeholder {
       // --> Disabled region is in the bottom part of the dropzone.
       
       // Calc the mouse position relative to the dropzone.
-      num mouseRelativeTop = event.page.y - _getTopOffset(dropzone.element);      
+      num mouseRelativeTop = event.page.y - css.getTopOffset(dropzone.element);      
       if (mouseRelativeTop > placeholderElement.clientHeight) {
         return true; // In disabled region.
       }
@@ -331,7 +334,7 @@ class _Placeholder {
   bool _isInDisabledHorizontalRegion(Dropzone dropzone, Position dropzonePosition, 
                                      MouseEvent event) {
     // Calc the mouse position relative to the dropzone.
-    num mouseRelativeLeft = event.page.x - _getLeftOffset(dropzone.element);      
+    num mouseRelativeLeft = event.page.x - css.getLeftOffset(dropzone.element);      
     
     if (placeholderPosition != null && placeholderPosition > dropzonePosition) {
       // Current placeholder position is after the new dropzone position.
@@ -348,22 +351,6 @@ class _Placeholder {
       }
     }
     return false;
-  }
-  
-  /**
-   * Get the left offset of [element] relative to the document.
-   */
-  num _getLeftOffset(Element element) {
-    return element.getBoundingClientRect().left + window.pageXOffset 
-        - document.documentElement.client.left;
-  }
-  
-  /**
-   * Get the top offset of [element] relative to the document.
-   */
-  num _getTopOffset(Element element) {
-    return element.getBoundingClientRect().top + window.pageYOffset 
-        - document.documentElement.client.top;
   }
 }
 

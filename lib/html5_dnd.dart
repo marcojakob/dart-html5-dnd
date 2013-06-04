@@ -7,9 +7,13 @@ library html5_dnd;
 import 'dart:html';
 import 'dart:async';
 import 'dart:collection';
+import 'dart:svg' as svg;
 import 'package:meta/meta.dart';
 import 'package:js/js.dart' as js;
 import 'package:logging/logging.dart';
+
+import 'package:html5_dnd/src/css_utils.dart' as css;
+import 'package:html5_dnd/src/html5_utils.dart' as html5;
 
 final _logger = new Logger("html5_dnd");
 
@@ -76,6 +80,13 @@ class Draggable {
   DragImageFunction dragImageFunction = (Draggable draggable) {
     return null;
   };
+  
+  /**
+   * If set to true, a custom drag image is drawn even if the browser supports
+   * the setting a custom drag image. The polyfill is a bit slower but allows
+   * opacity settings on [DragImage] to have an effect.
+   */
+  bool alwaysUseDragImagePolyfill = false;
 
   // -------------------
   // Events
@@ -113,7 +124,15 @@ class Draggable {
   Draggable(this.element, {String handle: null}) {
     // Enable native dragging.
     element.attributes['draggable'] = 'true';
-    _enableIE9drag();
+    if (!html5.supportsDraggable) {
+      // HTML5 draggable support is not available --> try to use workaround.
+      _logger.finest('Draggable is not supported, installing draggable polyfill');
+      _polyfillDraggable();
+    }
+    
+    DragImage dragImage;
+    bool usingDragImagePolyfill = false;
+    StreamSubscription polyfillDragOverSubscription;
 
     // If requested, use handle.
     bool isHandle = false;    
@@ -151,11 +170,11 @@ class Draggable {
         // Defer adding the dragging class until the end of the event loop.
         // This makes sure that the style is not applied to the drag image.
         Timer.run(() {
-          _addCssClass(element, draggingClass);
+          css.addCssClass(element, draggingClass);
         });
       }
       if (dragOccurringClass != null) {
-        _addCssClass(document.body, dragOccurringClass);
+        css.addCssClass(document.body, dragOccurringClass);
       }
       
       // The allowed 'type of drag'. 
@@ -172,10 +191,17 @@ class Draggable {
         });
       }
       
-      DragImage dragImage = dragImageFunction(this);
+      dragImage = dragImageFunction(this);
       if (dragImage != null) {
-        mouseEvent.dataTransfer.setDragImage(dragImage.image, dragImage.xOffset, 
-            dragImage.yOffset);
+        if (alwaysUseDragImagePolyfill || !html5.supportsSetDragImage) {
+          usingDragImagePolyfill = true;
+          // Install the polyfill.
+          polyfillDragOverSubscription = _polyfillSetDragImage(mouseEvent, dragImage);
+          
+        } else {
+          mouseEvent.dataTransfer.setDragImage(dragImage.image, dragImage.x, 
+              dragImage.y);
+        }
       }
       
       if (_onDragStart.hasListener && !_onDragStart.isPaused 
@@ -189,7 +215,6 @@ class Draggable {
       // Do nothing if no element of this dnd is dragged.
       if (currentDraggable == null || disabled) return;
       
-      // Just forward.
       if (_onDrag.hasListener && !_onDrag.isPaused 
           && !_onDrag.isClosed) {
         _onDrag.add(new DraggableEvent(this, mouseEvent));
@@ -204,10 +229,16 @@ class Draggable {
       
       // Remove CSS classes.
       if (draggingClass != null) {
-        _removeCssClass(element, draggingClass);
+        css.removeCssClass(element, draggingClass);
       }
       if (dragOccurringClass != null) {
-        _removeCssClass(document.body, dragOccurringClass);
+        css.removeCssClass(document.body, dragOccurringClass);
+      }
+      
+      // Remove drag image if polyfill was used.
+      if (usingDragImagePolyfill) {
+        dragImage.polyfill.remove();
+        polyfillDragOverSubscription.cancel();
       }
       
       if (_onDragEnd.hasListener && !_onDragEnd.isPaused 
@@ -216,6 +247,9 @@ class Draggable {
       }
       
       currentDraggable = null;
+      dragImage = null;
+      usingDragImagePolyfill = false;
+      polyfillDragOverSubscription = null;
     });
   }
   
@@ -223,28 +257,80 @@ class Draggable {
    * Workaround to enable Drag and Drop of elements other than links and images 
    * in Internet Explorer 9.
    */
-  void _enableIE9drag() {
-    if (element.draggable == null) {
-      // HTML5 draggable support is not available --> try to use workaround.
-      _logger.finest('Draggable is null, installing IE9 dragDrop() workaround');
+  void _polyfillDraggable() {
+    element.onSelectStart.listen((MouseEvent mouseEvent) {
+      if (disabled) return;
+      _logger.finest('Draggable Polyfill: onSelectStart');
       
-      element.onSelectStart.listen((MouseEvent mouseEvent) {
-        if (disabled) return;
-        _logger.finest('IE9 Workaround: onSelectStart');
-        
-        // Prevent selection of text.
-        mouseEvent.preventDefault();
-        
-        try {
-          // Call 'dragDrop()' on element via javascript function.
-          js.context.callDragDrop(element);
-        } on NoSuchMethodError {
-          _logger.severe('JavaScript method "callDragDrop" not found. Please' 
-              + ' load the file "dragdrop.ie9.js" with your application html.');
-        } catch(e) {
-          _logger.severe('Calling dragDrop() as a workaround for IE9 failed: ' 
-              + e.toString());
-        }
+      // Prevent selection of text.
+      mouseEvent.preventDefault();
+      
+      try {
+        // Call 'dragDrop()' on element via javascript function.
+        js.context.callDragDrop(element);
+      } on NoSuchMethodError {
+        _logger.severe('JavaScript method "callDragDrop" not found. Please' 
+            + ' load the file "dnd.polyfill.js" in your application html.');
+      } catch(e) {
+        _logger.severe('Calling "dragDrop()" polyfill via JavaScript failed: ' 
+            + e.toString());
+      }
+    });
+  }
+  
+  /**
+   * Installs the polyfill for 'setDragImage'. Instead of the native drag image
+   * an image is drawn and manually moved around.
+   * 
+   * The [StreamSubscription] of document.onDragOver event is returned and 
+   * should be canceled when the drag ended.
+   */
+  StreamSubscription _polyfillSetDragImage(MouseEvent mouseEvent, DragImage dragImage) {
+    _preventDefaultDragImage(mouseEvent);
+    
+    // Manually add the drag image polyfill with absolute position.
+    document.body.children.add(dragImage.polyfill);
+    dragImage.polyfill.style.position = 'absolute';
+    dragImage.polyfill.style.visibility = 'hidden';
+    
+    // Because of a Firefox Bug https://bugzilla.mozilla.org/show_bug.cgi?id=505521
+    // we can't use onDrag event of the dragged element because the mouse events
+    // x-coordinates are always 0.
+    StreamSubscription subscription = document.onDragOver.listen((MouseEvent docMouseEvent) {
+      // Manually set the position.
+      Point mousePosition = css.getMousePosition(docMouseEvent);
+      dragImage.polyfill.style.left = '${(mousePosition.x - dragImage.x)}px';
+      dragImage.polyfill.style.top = '${(mousePosition.y - dragImage.y)}px';
+      dragImage.polyfill.style.visibility = 'visible';
+    });
+    
+    return subscription;
+  }
+  
+  /**
+   * Prevents browser from drawing of standard drag image.
+   */
+  void _preventDefaultDragImage(MouseEvent mouseEvent) {
+    if (html5.supportsSetDragImage) {
+      // Set drag image to 
+      mouseEvent.dataTransfer.setDragImage(
+          new ImageElement(src: DragImage.EMPTY), 0, 0);
+    } else {
+      // To force the browser not to display the default drag image, which is the 
+      // html element beeing dragged, we must set display to 'none'. Visibility 
+      // 'hidden' won't work (IE drags a white box). To still keep the space
+      // of the display='none' element, we create a clone as a temporary 
+      // replacement.
+      Element tempReplacement = element.clone(true);
+      String display = element.style.display;
+      element.parent.insertBefore(tempReplacement, element);
+      element.style.display = 'none';
+      
+      Timer.run(() {
+        // At the end of the event loop, show original element again and remove 
+        // temporary replacement.
+        element.style.display = display;
+        tempReplacement.remove();
       });
     }
   }
@@ -333,23 +419,21 @@ class Dropzone {
       // Necessary for IE?
       mouseEvent.preventDefault();
       
-      _dragOverElements.add(mouseEvent.target);
-      _logger.finest('onDragEnter {dragOverElements.length: ${_dragOverElements.length}}');
+      // Test if this dropzone accepts the drop of the current draggable.
+      dropAccept = acceptDraggables.isEmpty 
+          || acceptDraggables.contains(currentDraggable.element);
+      if (dropAccept) {
+        mouseEvent.dataTransfer.dropEffect = currentDraggable.dropEffect;
+      } else {
+        mouseEvent.dataTransfer.dropEffect = 'none';
+        return; // Return here as drop is not accepted.
+      }
       
       // Only handle dropzone element itself and not any of its children.
-      if (_dragOverElements.length == 1) {
-        // Test if this dropzone accepts the drop of the current draggable.
-        dropAccept = acceptDraggables.isEmpty 
-            || acceptDraggables.contains(currentDraggable.element);
-        if (dropAccept) {
-          mouseEvent.dataTransfer.dropEffect = currentDraggable.dropEffect;
-        } else {
-          mouseEvent.dataTransfer.dropEffect = 'none';
-          return; // Return here as drop is not accepted.
-        }
+      if (_dragOverElements.length == 0) {
         
         if (overClass != null) {
-          _addCssClass(element, overClass);
+          css.addCssClass(element, overClass);
         }
             
         if (_onDragEnter.hasListener && !_onDragEnter.isPaused 
@@ -357,6 +441,9 @@ class Dropzone {
           _onDragEnter.add(new DropzoneEvent(currentDraggable, this, mouseEvent));
         }
       }
+      
+      _dragOverElements.add(mouseEvent.target);
+      _logger.finest('onDragEnter {dragOverElements.length: ${_dragOverElements.length}}');
     });
     
     // Drag Over.
@@ -383,7 +470,7 @@ class Dropzone {
     // Drag Leave.
     element.onDragLeave.listen((MouseEvent mouseEvent) {
       // Do nothing if no element of this dnd is dragged.
-      if (currentDraggable == null || disabled) return;
+      if (currentDraggable == null || disabled || !dropAccept) return;
       
       // Firefox fires too many onDragLeave events. This condition fixes it. 
       if (mouseEvent.target != mouseEvent.relatedTarget) {
@@ -395,7 +482,7 @@ class Dropzone {
       // Only handle on dropzone element and not on any of its children.
       if (_dragOverElements.length == 0) {
         if (overClass != null) {
-          _removeCssClass(element, overClass);
+          css.removeCssClass(element, overClass);
         }
         
         if (_onDragLeave.hasListener && !_onDragLeave.isPaused 
@@ -416,7 +503,7 @@ class Dropzone {
       mouseEvent.preventDefault(); 
       
       if (overClass != null) {
-        _removeCssClass(element, overClass);
+        css.removeCssClass(element, overClass);
       }
       
       if (_onDrop.hasListener && !_onDrop.isPaused 
@@ -465,58 +552,69 @@ class DropzoneEvent {
 }
 
 /**
- * A drag feedback [image]. The [xOffset] and [yOffset] define where the image 
+ * A drag feedback [image] element. The [x] and [y] define where the image 
  * should appear relative to the mouse cursor.
  */
 class DragImage {
-  ImageElement image;
-  int xOffset;
-  int yOffset;
+  /// A small transparent gif.
+  static const String EMPTY = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
   
-  DragImage(this.image, this.xOffset, this.yOffset);
-}
-
-/**
- * Calculates the index of the Element [element] in its parent. If there is no
- * parent, null is returned.
- */
-int getElementIndexInParent(Element element) {
-  if (element.parent == null) {
-    return null;
-  }
-  int index = 0;
-  var previous = element.previousElementSibling;
-  while (previous != null) {
-    index++;
-    previous = previous.previousElementSibling;
-  }
-  return index;
-}
-
-/**
- * Adds the [cssClass] to the [element]. Optionally includes scoped style for
- * web components.
- */
-void _addCssClass(Element element, String cssClass, {scopedStyle: false}) {
-  element.classes.add(cssClass);
+  final ImageElement image;
+  final int x;
+  final int y;
   
-  // Workaround for scoped css inside web components.
-  if (scopedStyle && element.attributes.containsKey('is')) {
-    String scopedCssPrefix = '${element.attributes['is']}_';
-    element.classes.add(scopedCssPrefix + cssClass);
-  }
-}
-
-/**
- * Removes the [cssClass] to the [element]. Optionally removes scoped style for
- * web components.
- */
-void _removeCssClass(Element element, String cssClass, {scopedStyle: false}) {
-  element.classes.remove(cssClass);
+  /// Opacity. Only has an effect it the polyfill is used.
+  String polyfillOpacity = '0.75';
   
-  // Workaround for scoped css inside web components.
-  if (scopedStyle && element.attributes.containsKey('is')) {
-    String scopedCssPrefix = '${element.attributes['is']}_';
-    element.classes.remove(scopedCssPrefix + cssClass);
+  Element _polyfill;
+  
+  DragImage(this.image, this.x, this.y);
+  
+  /**
+   * Returns the element that is used for the polyfill drag image.
+   * 
+   * As the drawn image might be under the cursor, we must make sure that mouse 
+   * events are passed through to the element underneath. This is done by 
+   * setting the CSS property 'pointer-events' to 'none'. If pointer-events are 
+   * not supported (IE9 and IE10) the image is wrapped inside an SVG. See also: 
+   * http://www.useragentman.com/blog/2013/04/26/clicking-through-clipped-images-using-css-pointer-events-svg-paths-and-vml/
+   */
+  Element get polyfill {
+    if (_polyfill == null) {
+      // Make sure that mouse events are forwarded to the layer below.
+      if (html5.supportsPointerEvents) {
+        _polyfill = image;
+        _polyfill.style.pointerEvents = 'none';
+      } else {
+        _polyfill = _createSvgElement();
+      }
+      
+      // Add some transparency.
+      _polyfill.style.opacity = polyfillOpacity;
+    }
+    return _polyfill;
+  }
+  
+  
+  /**
+   * Creates an SVG tag containing the [image].
+   */
+  Element _createSvgElement() {
+    return new svg.SvgElement.svg("""
+        <svg xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        
+        width="${image.width}"
+        height="${image.height}">
+        <image xlink:href="${image.src}" 
+          x="0" 
+          y="0" 
+          width="${image.width}" 
+          height="${image.height}" 
+          />
+        </svg>
+    """)
+    // Event IE9 and IE10 support pointer-events on SVGs.
+    ..style.pointerEvents = 'none';
   }
 }
