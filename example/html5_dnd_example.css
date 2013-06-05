@@ -26,12 +26,15 @@ h1, h2 {
   font-weight: normal;
   margin-top: 60px;
   margin-bottom: 20px;
-  clear: both;
 }
 
 /* --------------------------------------------------------------------------
  * General styles
  * ------------------------------------------------------------------------*/
+h2 {
+  clear: both; 
+}
+ 
 .example-container {
   width: 306px;
   padding: 0;
@@ -137,7 +140,7 @@ h1, h2 {
   margin-bottom: 80px;
 }
 
-.example-code .content div {
+.example-code .content > div {
   display: none;
   color: #93a1a1;
 }

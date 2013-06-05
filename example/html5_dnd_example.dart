@@ -11,7 +11,7 @@ import 'package:html5_dnd/html5_sortable.dart';
 part 'codeblocks.dart';
 
 main() {
-  // Default PrintHandler prints output to console.
+  // Uncomment to enable logging.
 //  Logger.root.onRecord.listen(new PrintHandler().call);
 //  Logger.root.level = Level.FINEST;
   
@@ -151,6 +151,7 @@ sectionNestedElements() {
   TextAreaElement textarea = query('#nested-elements .dropzone textarea');
   InputElement input = query('#nested-elements .dropzone input');
   input.value = 'Drag here!';
+  textarea.text = '';
   
   new Draggable(dragme);
   
