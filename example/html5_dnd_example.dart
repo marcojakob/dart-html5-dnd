@@ -29,10 +29,21 @@ main() {
   sectionSortableListHandles();
   sectionSortableListConnected();
   
-  installCodeTabs();
+  installCodeblockTabs();
 }
 
-installCodeTabs() {
+installCodeblockTabs() {
+  codeblockDraggableAndDropzone(query('#draggable-dropzone'));
+  codeblockDraggingDivs(query('#dragging-divs'));
+  codeblockDropEffects(query('#drop-effects'));
+  codeblockDragImages(query('#drag-images'));
+  codeblockNestedElements(query('#nested-elements'));
+  codeblockSortableList(query('#sortable-list'));
+  codeblockSortableGrid(query('#sortable-grid'));
+  codeblockSortableListExclude(query('#sortable-list-exclude'));
+  codeblockSortableListHandles(query('#sortable-list-handles'));
+  codeblockSortableListConnected(query('#sortable-list-connected'));
+  
   List<AnchorElement> tabLinks = queryAll('.example-code .menu li a');
   for (AnchorElement link in tabLinks) {
     link.onClick.listen((MouseEvent event) {
@@ -66,8 +77,6 @@ sectionDraggableAndDropzone() {
       event.draggable.element.remove();
       event.dropzone.element.classes.add('full');
     });
-  
-  codeblockDraggableAndDropzone(query('#draggable-dropzone'));
 }
 
 sectionDraggingDivs() {
@@ -77,8 +86,6 @@ sectionDraggingDivs() {
   var dropElement = query('#dragging-divs .dropzone');
   new Dropzone(dropElement)
     ..acceptDraggables.add(dragElement);
-  
-  codeblockDraggingDivs(query('#dragging-divs'));
 }
 
 sectionDropEffects() {
@@ -100,8 +107,6 @@ sectionDropEffects() {
       event.draggable.element.remove();
       event.dropzone.element.classes.add('full');
     });
-  
-  codeblockDropEffects(query('#drop-effects'));
 }
 
 sectionDragImages() {
@@ -141,8 +146,6 @@ sectionDragImages() {
   Element dropzone = query('#drag-images .dropzone');
   new Dropzone(dropzone)
     ..acceptDraggables.addAll([dragmeOne, dragmeTwo, dragmeThree, dragmeFour]);
-  
-  codeblockDragImages(query('#drag-images'));
 }
 
 sectionNestedElements() {
@@ -174,8 +177,6 @@ sectionNestedElements() {
       textarea.appendText('${enterLeaveCounter++} drop fired\n');
       textarea.scrollTop = textarea.scrollHeight;
     });
-  
-  codeblockNestedElements(query('#nested-elements'));
 }
 
 sectionSortableList() {
@@ -185,38 +186,28 @@ sectionSortableList() {
     ..onSortableComplete.listen((SortableResult result) {
       // do something when user sorted the elements...
     });
-  
-  codeblockSortableList(query('#sortable-list'));
 }
 
 sectionSortableGrid() {
   var items = queryAll('#sortable-grid li');
   
   new Sortable(items);
-  
-  codeblockSortableGrid(query('#sortable-grid'));
 }
 
 sectionSortableListExclude() {
   var items = queryAll('#sortable-list-exclude li:not(.disabled)');
   
   new Sortable(items);
-  
-  codeblockSortableListExclude(query('#sortable-list-exclude'));
 }
 
 sectionSortableListHandles() {
   var items = queryAll('#sortable-list-handles li');
   
   new Sortable(items, handle: 'span');
-  
-  codeblockSortableListHandles(query('#sortable-list-handles'));
 }
 
 sectionSortableListConnected() {
   var items = queryAll('#sortable-list-connected li');
   
   new Sortable(items);
-  
-  codeblockSortableListConnected(query('#sortable-list-connected'));
 }

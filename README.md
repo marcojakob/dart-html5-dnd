@@ -54,8 +54,9 @@ I'd like to thank the people who kindly helped me with their answers or put
 some tutorial or code examples online. They've already contributed to this 
 project.
 
-If you'd like to contribute too, you're welcome to file issues or 
-[fork](https://help.github.com/articles/fork-a-repo) my repository on GitHub.
+If you'd like to contribute, you're welcome to file issues or 
+[fork](https://help.github.com/articles/fork-a-repo) my 
+[repository on GitHub](https://github.com/marcojakob/dart-html5-dnd).
 
 
 ## License ##
