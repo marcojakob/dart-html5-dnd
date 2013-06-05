@@ -50,9 +50,8 @@ bool get supportsSetDragImage {
       // Call via javascript function.
       _supportsSetDragImage = js.context.supportsSetDragImage();
     } on NoSuchMethodError {
-      _logger.severe('JavaScript method "supportsSetDragImage()" not found. Please' 
-          + ' load the file "dnd.polyfill.js" in your application html.');
-      _lazySupportsSetDragImage = false;
+      _logger.severe('JavaScript method "supportsSetDragImage()" not found. Please load the file "dnd.polyfill.js" in your application html.');
+      _supportsSetDragImage = false;
     } catch(e) {
       _logger.severe('Calling "supportsSetDragImage()" via JavaScript failed: ' 
           + e.toString());

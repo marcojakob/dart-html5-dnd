@@ -111,9 +111,9 @@ class Draggable {
   // -------------------
   // Private
   // -------------------
-  StreamController<DraggableEvent> _onDragStart = new StreamController<DraggableEvent>();
-  StreamController<DraggableEvent> _onDrag = new StreamController<DraggableEvent>();
-  StreamController<DraggableEvent> _onDragEnd = new StreamController<DraggableEvent>();
+  StreamController<DraggableEvent> _onDragStart = new StreamController<DraggableEvent>(sync: true);
+  StreamController<DraggableEvent> _onDrag = new StreamController<DraggableEvent>(sync: true);
+  StreamController<DraggableEvent> _onDragEnd = new StreamController<DraggableEvent>(sync: true);
   
   /**
    * Creates a draggable with the specified [element].
@@ -366,10 +366,10 @@ class Dropzone {
   // ----------
   // Events
   // ----------
-  StreamController<DropzoneEvent> _onDragEnter = new StreamController<DropzoneEvent>();
-  StreamController<DropzoneEvent> _onDragOver = new StreamController<DropzoneEvent>();
-  StreamController<DropzoneEvent> _onDragLeave = new StreamController<DropzoneEvent>();
-  StreamController<DropzoneEvent> _onDrop = new StreamController<DropzoneEvent>();
+  StreamController<DropzoneEvent> _onDragEnter = new StreamController<DropzoneEvent>(sync: true);
+  StreamController<DropzoneEvent> _onDragOver = new StreamController<DropzoneEvent>(sync: true);
+  StreamController<DropzoneEvent> _onDragLeave = new StreamController<DropzoneEvent>(sync: true);
+  StreamController<DropzoneEvent> _onDrop = new StreamController<DropzoneEvent>(sync: true);
   
   /**
    * Fired when the mouse is first moved over this dropzone while dragging the 

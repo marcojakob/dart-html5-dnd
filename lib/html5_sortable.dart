@@ -72,7 +72,7 @@ class Sortable {
   /// Callback function that is called when the drag is ended by a drop.
   /// If the user aborted the drag, the function is not called.
   StreamController<SortableResult> _onSortableComplete = 
-      new StreamController<SortableResult>();
+      new StreamController<SortableResult>(sync: true);
   
   static final RegExp _floatRegExp = new RegExp(r'left|right');
   
@@ -114,6 +114,7 @@ class Sortable {
       _placeholder = new _Placeholder(event.draggable.element, placeholderClass, 
           forcePlaceholderSize);
       _placeholder.onDrop.listen((_) {
+        _dropped = true;
         _showDraggable(_placeholder.placeholderPosition);
       });
     })
@@ -124,6 +125,7 @@ class Sortable {
         // Not dropped. This means the drag ended outside of a placeholder or
         // the drag was cancelled somehow (ESC-key, ...)
         // Revert to state before dragging.
+        _logger.finest('onDragEnd not dropped -> Revert to state before dragging');
         _showDraggable(_originalPosition);
       }
       
@@ -172,17 +174,9 @@ class Sortable {
         }
       }
     });
-    
-    dropzone.onDrop.listen((DropzoneEvent event) {
-      // Return if drag is not from this sortable.
-      if (_placeholder == null) return;
-      _logger.finest('dropzone onDrop');
-      _showDraggable(_placeholder.placeholderPosition);
-    });
   }
   
   void _showDraggable(Position newPosition) {
-    _dropped = true;
     _placeholder.placeholderElement.remove();
     newPosition.insert(currentDraggable.element);
     
@@ -209,7 +203,8 @@ class _Placeholder {
   /// Fired when a drag element has been dropped in this placeholder.
   Stream<_Placeholder> get onDrop => _onDrop.stream;
   
-  StreamController<_Placeholder> _onDrop = new StreamController<_Placeholder>();
+  StreamController<_Placeholder> _onDrop = 
+      new StreamController<_Placeholder>(sync: true);
   
   /**
    * Creates a new placeholder for the specified [draggableElement].
