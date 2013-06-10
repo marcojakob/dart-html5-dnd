@@ -15,8 +15,8 @@ import 'package:logging/logging.dart';
 import 'package:html5_dnd/src/css_utils.dart' as css;
 import 'package:html5_dnd/src/html5_utils.dart' as html5;
 
-part 'src/draggable.dart';
-part 'src/dropzone.dart';
+part 'draggable.dart';
+part 'dropzone.dart';
 
 final _logger = new Logger("html5_dnd");
 

@@ -13,7 +13,7 @@ import 'package:html5_dnd/html5_dnd.dart';
 import 'package:html5_dnd/src/css_utils.dart' as css;
 import 'package:html5_dnd/src/html5_utils.dart' as html5;
 
-part 'src/sortable.dart';
+part 'sortable.dart';
 
 final _logger = new Logger("html5_sortable");
 

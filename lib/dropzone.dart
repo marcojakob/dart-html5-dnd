@@ -96,9 +96,12 @@ class DropzoneGroup extends Group {
         return; // Return here as drop is not accepted.
       }
       
+      _logger.finest('onDragEnter {dragOverElements.length before adding: ${currentDragOverElements.length}}');
+      currentDragOverElements.add(mouseEvent.target);
+      
       // Only handle dropzone element itself and not any of its children.
-      if (currentDragOverElements.length == 0) {
-        
+      if (currentDragOverElements.length == 1) {
+        _logger.finest('firing onDragEnter');
         if (currentDraggableGroup.overClass != null) {
           css.addCssClass(element, currentDraggableGroup.overClass);
         }
@@ -108,9 +111,6 @@ class DropzoneGroup extends Group {
               element, mouseEvent));
         }
       }
-      
-      currentDragOverElements.add(mouseEvent.target);
-      _logger.finest('onDragEnter {dragOverElements.length: ${currentDragOverElements.length}}');
     }));
     
     // Drag Over.
@@ -141,13 +141,12 @@ class DropzoneGroup extends Group {
       
       // Firefox fires too many onDragLeave events. This condition fixes it. 
       if (mouseEvent.target != mouseEvent.relatedTarget) {
+        _logger.finest('onDragLeave {dragOverElements.length before removing: ${currentDragOverElements.length}}');
         currentDragOverElements.remove(mouseEvent.target);
       }
       
-      _logger.finest('onDragLeave {dragOverElements.length: ${currentDragOverElements.length}}');
-      
       // Only handle on dropzone element and not on any of its children.
-      if (currentDragOverElements.length == 0) {
+      if (currentDragOverElements.isEmpty) {
         if (currentDraggableGroup.overClass != null) {
           css.removeCssClass(element, currentDraggableGroup.overClass);
         }
