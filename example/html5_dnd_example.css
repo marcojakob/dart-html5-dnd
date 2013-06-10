@@ -356,31 +356,66 @@ h2 {
 }
  
 /* --------------------------------------------------------------------------
- * Section: sortable-list-connected
+ * Section: sortable-two-groups
  * ------------------------------------------------------------------------*/
-#sortable-list-connected .dnd-placeholder {
+#sortable-two-groups .dnd-placeholder {
   border: 1px dashed #CCC;
   background: none;  
 }
 
-#sortable-list-connected {
-  overflow: hidden;
+#sortable-two-groups .dnd-dragging {
+  opacity: 0.5;
 }
 
-#sortable-list-connected li {
+#sortable-two-groups li {
   cursor: move;
 }
 
-#sortable-list-connected .list1 {
+#sortable-two-groups .group1 {
   float: left;
   width: 150px;
 }
 
-#sortable-list-connected .list2 {
+#sortable-two-groups .group2 {
   float: right;
   width: 150px;
 }
  
- 
- 
- 
+/* --------------------------------------------------------------------------
+ * Section: draggable-sortable
+ * ------------------------------------------------------------------------*/
+#draggable-sortable {
+  height: 250px;
+}
+
+#draggable-sortable .dnd-placeholder {
+  border: 1px dashed #CCC;
+  background: none;  
+}
+
+#draggable-sortable .dnd-dragging {
+  opacity: 0.5;
+}
+
+#draggable-sortable .dnd-over {
+  background: #d387ca;
+}
+
+#draggable-sortable .group1 li {
+  cursor: move;
+}
+
+#draggable-sortable .group1 {
+  float: left;
+  width: 150px;
+}
+
+#draggable-sortable .group2 {
+  float: right;
+  width: 150px;
+}
+
+#draggable-sortable .group2 .empty {
+  border: 1px dashed #CCC;
+  color: #333;
+}

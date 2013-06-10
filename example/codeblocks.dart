@@ -61,18 +61,18 @@ codeblockDraggableAndDropzone(Element section) {
       ''', 
       // Dart
       '''
-List documents = queryAll('#draggable-dropzone .document');
-for (var document in documents) {
-  new Draggable(document);
-}
+// Install draggables (documents).
+DraggableGroup dragGroup = new DraggableGroup()
+..installAll(queryAll('#draggable-dropzone .document'));
 
-var trash = query('#draggable-dropzone .trash');
-new Dropzone(trash)
-  ..acceptDraggables.addAll(documents)
-  ..onDrop.listen((DropzoneEvent event) {
-    event.draggable.element.remove();
-    event.dropzone.element.classes.add('full');
-  });      
+// Install dropzone (trash).
+DropzoneGroup dropGroup = new DropzoneGroup()
+..install(query('#draggable-dropzone .trash'))
+..accept.add(dragGroup)
+..onDrop.listen((DropzoneEvent event) {
+  event.draggable.remove();
+  event.dropzone.classes.add('full');
+});
       ''');
 }
 
@@ -100,12 +100,14 @@ codeblockDraggingDivs(Element section) {
       ''', 
       // Dart
       '''
-Element dragElement = query('#dragging-divs .dragme');
-new Draggable(dragElement);
+  // Install draggable.
+DraggableGroup dragGroup = new DraggableGroup()
+..installAll(queryAll('#dragging-divs .dragme'));
 
-var dropElement = query('#dragging-divs .dropzone');
-new Dropzone(dropElement)
-  ..acceptDraggables.add(dragElement);
+// Install dropzone.
+DropzoneGroup dropGroup = new DropzoneGroup()
+..install(query('#dragging-divs .dropzone'))
+..accept.add(dragGroup);
   ''');
 }
 
@@ -147,24 +149,31 @@ codeblockDropEffects(Element section) {
       ''', 
       // Dart
       '''
-Draggable move = new Draggable(query('#drop-effects .move'))
-  ..dropEffect = 'move';
-Draggable copy = new Draggable(query('#drop-effects .copy'))
-  ..dropEffect = 'copy';
-Draggable link = new Draggable(query('#drop-effects .link'))
-  ..dropEffect = 'link';
-Draggable none = new Draggable(query('#drop-effects .none'))
-  ..dropEffect = 'none';
+// Install draggables.
+DraggableGroup dragGroupMove = new DraggableGroup()
+..install(query('#drop-effects .move'))
+..dropEffect = 'move';
 
-new Dropzone(query('#drop-effects .trash'))
-  ..acceptDraggables.addAll([move.element, 
-                             copy.element, 
-                             link.element, 
-                             none.element])
-  ..onDrop.listen((DropzoneEvent event) {
-    event.draggable.element.remove();
-    event.dropzone.element.classes.add('full');
-  });
+DraggableGroup dragGroupCopy = new DraggableGroup()
+..install(query('#drop-effects .copy'))
+..dropEffect = 'copy';
+
+DraggableGroup dragGroupLink = new DraggableGroup()
+..install(query('#drop-effects .link'))
+..dropEffect = 'link';
+
+DraggableGroup dragGroupNone = new DraggableGroup()
+..install(query('#drop-effects .none'))
+..dropEffect = 'none';
+
+// Install dropzone.
+DropzoneGroup dropGroup = new DropzoneGroup()
+..install(query('#drop-effects .trash'))
+..accept.addAll([dragGroupMove, dragGroupCopy, dragGroupLink, dragGroupNone])
+..onDrop.listen((DropzoneEvent event) {
+  event.draggable.remove();
+  event.dropzone.classes.add('full');
+});
   ''');
 }
 
@@ -209,33 +218,36 @@ var dataUrl = canvas.toDataUrl("image/jpeg", 0.95);
 //Create a new image element from the data URL.
 ImageElement canvasImage = new ImageElement(src: dataUrl);
 
-Element dragmeOne = query('#drag-images .one');
-Element dragmeTwo= query('#drag-images .two');
-Element dragmeThree = query('#drag-images .three');
-Element dragmeFour = query('#drag-images .four');
+// Install draggables.
+DraggableGroup dragGroupOne = new DraggableGroup()
+..install(query('#drag-images .one'))
+..dragImageFunction = (Element draggable) {
+  return new DragImage(png, 40, 40);
+};
 
-new Draggable(dragmeOne)
-  ..dragImageFunction = (Draggable draggable) {
-    return new DragImage(png, 40, 40);
-  };
-new Draggable(dragmeTwo)
-  ..dragImageFunction = (Draggable draggable) {
-    return new DragImage(png, -20, -20);
-  };
-new Draggable(dragmeThree)
-  ..dragImageFunction = (Draggable draggable) {
-    return new DragImage(canvasImage, 0, 0);
-  };
-new Draggable(dragmeFour)
-  ..dragImageFunction = (Draggable draggable) {
-    return new DragImage(canvasImage, 0, 0);
-  }
-  ..alwaysUseDragImagePolyfill = true;
+DraggableGroup dragGroupTwo = new DraggableGroup()
+..install(query('#drag-images .two'))
+..dragImageFunction = (Element draggable) {
+  return new DragImage(png, -20, -20);
+};
 
+DraggableGroup dragGroupThree = new DraggableGroup()
+..install(query('#drag-images .three'))
+..dragImageFunction = (Element draggable) {
+  return new DragImage(canvasImage, 0, 0);
+};
 
-Element dropzone = query('#drag-images .dropzone');
-new Dropzone(dropzone)
-  ..acceptDraggables.addAll([dragmeOne, dragmeTwo, dragmeThree, dragmeFour]);
+DraggableGroup dragGroupFour = new DraggableGroup()
+..install(query('#drag-images .four'))
+..alwaysUseDragImagePolyfill = true
+..dragImageFunction = (Element draggable) {
+  return new DragImage(canvasImage, 0, 0);
+};
+
+// Install dropzone.
+DropzoneGroup dropGroup = new DropzoneGroup()
+..install(query('#drag-images .dropzone'))
+..accept.addAll([dragGroupOne, dragGroupTwo, dragGroupThree, dragGroupFour]);
   ''');
 }
 
@@ -269,33 +281,36 @@ codeblockNestedElements(Element section) {
       ''', 
       // Dart
       '''
-Element dragme = query('#nested-elements .dragme');
-Element dropzone = query('#nested-elements .dropzone');
 TextAreaElement textarea = query('#nested-elements .dropzone textarea');
 InputElement input = query('#nested-elements .dropzone input');
 input.value = 'Drag here!';
-
-new Draggable(dragme);
-
+textarea.text = '';
 int enterLeaveCounter = 1;
 int overCounter = 1;
-new Dropzone(dropzone)
-  ..acceptDraggables.add(dragme)
-  ..onDragEnter.listen((DropzoneEvent event) {
-    textarea.appendText('\${enterLeaveCounter++} drag enter fired\n');
-    textarea.scrollTop = textarea.scrollHeight;
-  })
-  ..onDragOver.listen((DropzoneEvent event) {
-    input.value = '\${overCounter++} drag over fired';
-  })
-  ..onDragLeave.listen((DropzoneEvent event) {
-    textarea.appendText('\${enterLeaveCounter++} drag leave fired\n');
-    textarea.scrollTop = textarea.scrollHeight;
-  })
-  ..onDrop.listen((DropzoneEvent event) {
-    textarea.appendText('\${enterLeaveCounter++} drop fired\n');
-    textarea.scrollTop = textarea.scrollHeight;
-  });
+
+// Install draggables.
+DraggableGroup dragGroup = new DraggableGroup()
+..install(query('#nested-elements .dragme'));
+
+// Install dropzone.
+DropzoneGroup dropGroup = new DropzoneGroup()
+..install(query('#nested-elements .dropzone'))
+..accept.add(dragGroup)
+..onDragEnter.listen((DropzoneEvent event) {
+  textarea.appendText('\${enterLeaveCounter++} drag enter fired\n');
+  textarea.scrollTop = textarea.scrollHeight;
+})
+..onDragOver.listen((DropzoneEvent event) {
+  input.value = '\${overCounter++} drag over fired';
+})
+..onDragLeave.listen((DropzoneEvent event) {
+  textarea.appendText('\${enterLeaveCounter++} drag leave fired\n');
+  textarea.scrollTop = textarea.scrollHeight;
+})
+..onDrop.listen((DropzoneEvent event) {
+  textarea.appendText('\${enterLeaveCounter++} drop fired\n');
+  textarea.scrollTop = textarea.scrollHeight;
+});
   ''');
 }
 
@@ -325,12 +340,14 @@ codeblockSortableList(Element section) {
       ''', 
       // Dart
       '''
-var items = queryAll('#sortable-list li');
+SortableGroup sortGroup = new SortableGroup()
+..installAll(queryAll('#sortable-list li'))
+..onSortUpdate.listen((SortableEvent event) {
+  // do something when user sorted the elements...
+});
 
-new Sortable(items)
-  ..onSortableComplete.listen((SortableResult result) {
-    // do something when user sorted the elements...
-  });
+// Only accept elements from this section.
+sortGroup.accept.add(sortGroup);
   ''');
 }
 
@@ -362,9 +379,12 @@ codeblockSortableGrid(Element section) {
       ''', 
       // Dart
       '''
-var items = queryAll('#sortable-grid li');
+SortableGroup sortGroup = new SortableGroup()
+..installAll(queryAll('#sortable-grid li'))
+..isGrid = true;
 
-new Sortable(items);
+// Only accept elements from this section.
+sortGroup.accept.add(sortGroup);
   ''');
 }
 
@@ -394,9 +414,11 @@ codeblockSortableListExclude(Element section) {
       ''', 
       // Dart
       '''
-var items = queryAll('#sortable-list-exclude li:not(.disabled)');
+SortableGroup sortGroup = new SortableGroup()
+..installAll(queryAll('#sortable-list-exclude li:not(.disabled)'));
 
-new Sortable(items);
+// Only accept elements from this section.
+sortGroup.accept.add(sortGroup);
   ''');
 }
 
@@ -426,13 +448,15 @@ codeblockSortableListHandles(Element section) {
       ''', 
       // Dart
       '''
-var items = queryAll('#sortable-list-handles li');
+SortableGroup sortGroup = new SortableGroup(handle: 'span')
+..installAll(queryAll('#sortable-list-handles li'));
 
-new Sortable(items, handle: 'span');
+// Only accept elements from this section.
+sortGroup.accept.add(sortGroup);
   ''');
 }
 
-codeblockSortableListConnected(Element section) {
+codeblockSortableTwoGroups(Element section) {
   _createCodeblock(section, 
       // HTML
       '''
@@ -455,33 +479,138 @@ codeblockSortableListConnected(Element section) {
       ''', 
       // CSS
       '''
-#sortable-list-connected .dnd-placeholder {
+#sortable-two-groups .dnd-placeholder {
   border: 1px dashed #CCC;
   background: none;  
 }
 
-#sortable-list-connected {
-  overflow: hidden;
+#sortable-two-groups .dnd-dragging {
+  opacity: 0.5;
 }
 
-#sortable-list-connected li {
+#sortable-two-groups li {
   cursor: move;
 }
 
-#sortable-list-connected .list1 {
+#sortable-two-groups .group1 {
   float: left;
   width: 150px;
 }
 
-#sortable-list-connected .list2 {
+#sortable-two-groups .group2 {
   float: right;
   width: 150px;
 }
       ''', 
       // Dart
       '''
-var items = queryAll('#sortable-list-connected li');
+ImageElement png = new ImageElement(src: 'icons/smiley-happy.png');
 
-new Sortable(items);
+SortableGroup sortGroup1 = new SortableGroup()
+..installAll(queryAll('#sortable-two-groups .group1 li'))
+..onSortUpdate.listen((SortableEvent event) {
+  event.originalGroup.uninstall(event.draggable);
+  event.newGroup.install(event.draggable);
+});
+
+SortableGroup sortGroup2 = new SortableGroup()
+..installAll(queryAll('#sortable-two-groups .group2 li'))
+..dragImageFunction = (Element draggable) {
+  return new DragImage(png, 0, 0);
+}
+..onSortUpdate.listen((SortableEvent event) {
+  event.originalGroup.uninstall(event.draggable);
+  event.newGroup.install(event.draggable);
+});
+
+// Only accept elements from this section.
+sortGroup1.accept.addAll([sortGroup1, sortGroup2]);
+sortGroup2.accept.addAll([sortGroup1, sortGroup2]);
+  ''');
+}
+
+codeblockDraggableSortable(Element section) {
+  _createCodeblock(section, 
+      // HTML
+      '''
+<ul class="example-box group1">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+  <li>Item 4</li>
+  <li>Item 5</li>
+  <li>Item 6</li>
+</ul>
+<ul class="example-box group2">
+  <li class="empty">Empty list!</li>
+</ul>
+      ''', 
+      // CSS
+      '''
+#draggable-sortable {
+  height: 250px;
+}
+
+#draggable-sortable .dnd-placeholder {
+  border: 1px dashed #CCC;
+  background: none;  
+}
+
+#draggable-sortable .dnd-dragging {
+  opacity: 0.5;
+}
+
+#draggable-sortable .dnd-over {
+  background: #d387ca;
+}
+
+#draggable-sortable .group1 li {
+  cursor: move;
+}
+
+#draggable-sortable .group1 {
+  float: left;
+  width: 150px;
+}
+
+#draggable-sortable .group2 {
+  float: right;
+  width: 150px;
+}
+
+#draggable-sortable .group2 .empty {
+  border: 1px dashed #CCC;
+  color: #333;
+}
+      ''', 
+      // Dart
+      '''
+DraggableGroup dragGroup = new DraggableGroup()
+..installAll(queryAll('#draggable-sortable .group1 li'));
+
+// Create sortable group with initially no installed elements.
+SortableGroup sortGroup = new SortableGroup()
+..onSortUpdate.listen((SortableEvent event) {
+  event.originalGroup.uninstall(event.draggable);
+  event.newGroup.install(event.draggable);
+});
+sortGroup.accept.addAll([dragGroup, sortGroup]);
+
+LIElement emptyItem = query('#draggable-sortable .group2 .empty');
+
+// Install an empty item as a dropzone no element is in the list.
+DropzoneGroup emptyListDropzone = new DropzoneGroup()
+..install(emptyItem)
+..accept.add(dragGroup)
+..onDrop.listen((DropzoneEvent event) {
+  // Hide empty item.
+  emptyItem.style.display = 'none';
+  
+  // Uninstall in old group and install in new group.
+  dragGroup.uninstall(event.draggable);
+  event.draggable.remove();
+  sortGroup.install(event.draggable);
+  query('#draggable-sortable .group2').children.add(event.draggable);
+});
   ''');
 }

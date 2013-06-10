@@ -173,7 +173,7 @@
     
     <h2>Sortable Grid</h2>
     <p>
-      Grid behaviour is applied when elements are floated.
+      Reorder elements inside a grid.
     </p>
     <div id="sortable-grid" class="example-container">
       <ul class="example-box grid">
@@ -218,12 +218,17 @@
       </ul>
     </div>
     
-    <h2>Connected Sortable Lists</h2>
+    <h2>Two Sortable Groups</h2>
     <p>
-      Two connected lists.      
+      Two sortable groups that are connected with each other. 
     </p>
-    <div id="sortable-list-connected" class="example-container">
-      <ul class="example-box list1">
+    <p>
+      Elements in the right group display an icon when dragged, elements in the 
+      left group display the dragged element. Whenever an element changes group 
+      it is uninstalled from the previous group and installed in the new group.
+    </p>
+    <div id="sortable-two-groups" class="example-container">
+      <ul class="example-box group1">
         <li>Item 1</li>
         <li>Item 2</li>
         <li>Item 3</li>
@@ -231,13 +236,32 @@
         <li>Item 5</li>
         <li>Item 6</li>
       </ul>
-      <ul class="example-box list2">
+      <ul class="example-box group2">
         <li class="other">Item 1</li>
         <li class="other">Item 2</li>
         <li class="other">Item 3</li>
         <li class="other">Item 4</li>
         <li class="other">Item 5</li>
         <li class="other">Item 6</li>
+      </ul>
+    </div>
+    
+    <h2>Draggables and a Sortable Group</h2>
+    <p>
+      The draggable elements on the left can be dragged into the sortable group
+      on the right.
+    </p>
+    <div id="draggable-sortable" class="example-container">
+      <ul class="example-box group1">
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+        <li>Item 4</li>
+        <li>Item 5</li>
+        <li>Item 6</li>
+      </ul>
+      <ul class="example-box group2">
+        <li class="empty">Empty list!</li>
       </ul>
     </div>
   </article>
