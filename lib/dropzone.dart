@@ -103,7 +103,7 @@ class DropzoneGroup extends Group {
       if (currentDragOverElements.length == 1) {
         _logger.finest('firing onDragEnter');
         if (currentDraggableGroup.overClass != null) {
-          css.addCssClass(element, currentDraggableGroup.overClass);
+          element.classes.add(currentDraggableGroup.overClass);
         }
         
         if (_onDragEnter != null) {
@@ -148,7 +148,7 @@ class DropzoneGroup extends Group {
       // Only handle on dropzone element and not on any of its children.
       if (currentDragOverElements.isEmpty) {
         if (currentDraggableGroup.overClass != null) {
-          css.removeCssClass(element, currentDraggableGroup.overClass);
+          element.classes.remove(currentDraggableGroup.overClass);
         }
         
         if (_onDragLeave != null) {
@@ -168,7 +168,7 @@ class DropzoneGroup extends Group {
       mouseEvent.preventDefault(); 
       
       if (currentDraggableGroup.overClass != null) {
-        css.removeCssClass(element, currentDraggableGroup.overClass);
+        element.classes.remove(currentDraggableGroup.overClass);
       }
       
       if (_onDrop != null) {

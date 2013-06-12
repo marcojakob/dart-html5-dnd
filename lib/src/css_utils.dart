@@ -50,31 +50,3 @@ Point getMousePosition(MouseEvent event) {
   
   return new Point(x.round(), y.round());
 }
-
-/**
- * Adds the [cssClass] to the [element]. Optionally includes scoped style for
- * web components.
- */
-void addCssClass(Element element, String cssClass, {scopedStyle: false}) {
-  element.classes.add(cssClass);
-  
-  // Workaround for scoped css inside web components.
-  if (scopedStyle && element.attributes.containsKey('is')) {
-    String scopedCssPrefix = '${element.attributes['is']}_';
-    element.classes.add(scopedCssPrefix + cssClass);
-  }
-}
-
-/**
- * Removes the [cssClass] to the [element]. Optionally removes scoped style for
- * web components.
- */
-void removeCssClass(Element element, String cssClass, {scopedStyle: false}) {
-  element.classes.remove(cssClass);
-  
-  // Workaround for scoped css inside web components.
-  if (scopedStyle && element.attributes.containsKey('is')) {
-    String scopedCssPrefix = '${element.attributes['is']}_';
-    element.classes.remove(scopedCssPrefix + cssClass);
-  }
-}

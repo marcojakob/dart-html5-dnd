@@ -177,16 +177,16 @@ class DraggableGroup extends Group {
       currentDraggable = element;
       currentDraggableGroup = this;
       
-      // Add CSS classes (if 
+      // Add CSS classes
       if (draggingClass != null) {
         // Defer adding the dragging class until the end of the event loop.
         // This makes sure that the style is not applied to the drag image.
         Timer.run(() {
-          css.addCssClass(element, draggingClass);
+          element.classes.add(draggingClass);
         });
       }
       if (dragOccurringClass != null) {
-        css.addCssClass(document.body, dragOccurringClass);
+        document.body.classes.add(dragOccurringClass);
       }
       
       // The allowed 'type of drag'. 
@@ -244,10 +244,10 @@ class DraggableGroup extends Group {
       
       // Remove CSS classes.
       if (draggingClass != null) {
-        css.removeCssClass(element, draggingClass);
+        element.classes.remove(draggingClass);
       }
       if (dragOccurringClass != null) {
-        css.removeCssClass(document.body, dragOccurringClass);
+        document.body.classes.remove(dragOccurringClass);
       }
       
       // Remove drag image if polyfill was used.
