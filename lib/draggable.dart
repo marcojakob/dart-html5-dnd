@@ -44,19 +44,12 @@ class DraggableGroup extends Group {
   };
   
   /**
-   * Function to create a [DragImage] for this draggable. Default function
-   * returns null.
+   * Function to create a [DragImage] for this draggable. If null is returned
+   * from the function (the default), the browser's drag image is used instead. 
    */
   DragImageFunction dragImageFunction = (Element draggable) {
     return null;
   };
-  
-  /**
-   * If set to true, a custom drag image is drawn even if the browser supports
-   * the setting a custom drag image. The polyfill is a bit slower but allows
-   * opacity settings on [DragImage] to have an effect.
-   */
-  bool alwaysUseDragImagePolyfill = false;
   
   // -------------------
   // Draggable Events
@@ -205,16 +198,38 @@ class DraggableGroup extends Group {
       
       dragImage = dragImageFunction(element);
       if (dragImage != null) {
-        if (alwaysUseDragImagePolyfill || !html5.supportsSetDragImage) {
+        if (html5.supportsSetDragImage) {
+          mouseEvent.dataTransfer.setDragImage(dragImage.element, dragImage.x, 
+              dragImage.y);
+        } else {
           usingDragImagePolyfill = true;
           // Install the polyfill.
           polyfillDragOverSubscription = _polyfillSetDragImage(element, 
               mouseEvent, dragImage);
-          
-        } else {
-          mouseEvent.dataTransfer.setDragImage(dragImage.image, dragImage.x, 
-              dragImage.y);
         }
+      } else if (!html5.supportsDraggable) {
+        // Browser does not create a drag image by default --> polyfill it.
+        _logger.finest('Manually creating drag image from current drag element.');
+        usingDragImagePolyfill = true;
+        
+        // Install the polyfill with a clone of the current drag element as drag image.
+        if (element is ImageElement) {
+          // Calc the mouse position relative to the draggable.
+          num mouseRelativeLeft = mouseEvent.page.x - css.getLeftOffset(element); 
+          num mouseRelativeTop = mouseEvent.page.y - css.getTopOffset(element); 
+          dragImage = new DragImage(new ImageElement(src: element.src, 
+              width: element.width, height: element.height), 
+              mouseRelativeLeft.round(), mouseRelativeTop.round());
+        } else {
+          // Not an image --> Make sure mouse is outside of drag image.
+          Element clone = element.clone(true);
+          clone.attributes.remove('id');
+          clone.style.width = element.getComputedStyle().width;
+          clone.style.height = element.getComputedStyle().height;
+          dragImage = new DragImage(clone, 0, -5);
+        }
+        polyfillDragOverSubscription = _polyfillSetDragImage(element, 
+            mouseEvent, dragImage);
       }
       
       if (_onDragStart != null) {
@@ -305,10 +320,11 @@ class DraggableGroup extends Group {
    */
   StreamSubscription _polyfillSetDragImage(Element element, MouseEvent mouseEvent, 
                                            DragImage dragImage) {
+    _logger.finest('Polyfilling setDragImage function.');
     _preventDefaultDragImage(element, mouseEvent);
     
     // Manually add the drag image polyfill with absolute position.
-    document.body.children.add(dragImage.polyfill);
+    element.parent.children.add(dragImage.polyfill);
     dragImage.polyfill.style.position = 'absolute';
     dragImage.polyfill.style.visibility = 'hidden';
     
@@ -332,10 +348,10 @@ class DraggableGroup extends Group {
       // Set drag image to 
       mouseEvent.dataTransfer.setDragImage(
           new ImageElement(src: DragImage.EMPTY), 0, 0);
-    } else {
+    } else if (html5.supportsDraggable) {
       // To force the browser not to display the default drag image, which is the 
       // html element beeing dragged, we must set display to 'none'. Visibility 
-      // 'hidden' won't work (IE drags a white box). To still keep the space
+      // 'hidden' won't work (IE10 drags a white box). To still keep the space
       // of the display='none' element, we create a clone as a temporary 
       // replacement.
       Element tempReplacement = element.clone(true);
@@ -368,14 +384,21 @@ class DraggableEvent {
 }
 
 /**
- * A drag feedback [image] element. The [x] and [y] define where the image 
- * should appear relative to the mouse cursor.
+ * A drag feedback image. The [x] and [y] define where the drag image should 
+ * appear relative to the mouse cursor.
+ * 
+ * The drag image [element] can be an HTML img element, an HTML canvas element 
+ * or any visible HTML node on the page.
+ * 
+ * **Important:** In IE9 and IE10, mouse events can only be passed through 
+ * [ImageElement]s. If another HTML element is provided, the mouse must be 
+ * positioned outside of the drag image with [x] and [y].
  */
 class DragImage {
   /// A small transparent gif.
   static const String EMPTY = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
   
-  final ImageElement image;
+  final Element element;
   final int x;
   final int y;
   
@@ -384,7 +407,7 @@ class DragImage {
   
   Element _polyfill;
   
-  DragImage(this.image, this.x, this.y);
+  DragImage(this.element, this.x, this.y);
   
   /**
    * Returns the element that is used for the polyfill drag image.
@@ -399,12 +422,17 @@ class DragImage {
     if (_polyfill == null) {
       // Make sure that mouse events are forwarded to the layer below.
       if (html5.supportsPointerEvents) {
-        _polyfill = image;
-      } else {
+        _polyfill = element;
+        _polyfill.style.pointerEvents = 'none';
+      } else if (element is ImageElement) {
         // IE9 and IE10 support pointer-events on SVGs only.
-        _polyfill = _createSvgElement();
+        _polyfill = _createSvgFromImage(element as ImageElement);
+        _polyfill.style.pointerEvents = 'none';
+      } else {
+        // No support for pointer-events.
+        _logger.finest('pointer-events not supported: mouse must be outside of drag image.');
+        _polyfill = element;
       }
-      _polyfill.style.pointerEvents = 'none';
       
       // Add some transparency.
       _polyfill.style.opacity = polyfillOpacity;
@@ -412,24 +440,22 @@ class DragImage {
     return _polyfill;
   }
   
-  
   /**
    * Creates an SVG tag containing the [image].
    */
-  Element _createSvgElement() {
+  Element _createSvgFromImage(ImageElement image) {
     return new svg.SvgElement.svg("""
         <svg xmlns="http://www.w3.org/2000/svg"
         xmlns:xlink="http://www.w3.org/1999/xlink"
-        
         width="${image.width}"
         height="${image.height}">
         <image xlink:href="${image.src}" 
-          x="0" 
-          y="0" 
-          width="${image.width}" 
-          height="${image.height}" 
-          />
+        x="0" 
+        y="0" 
+        width="${image.width}" 
+        height="${image.height}" 
+        />
         </svg>
     """);
-  }
+  } 
 }

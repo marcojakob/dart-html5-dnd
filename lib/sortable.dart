@@ -411,12 +411,12 @@ class _Placeholder {
     newPosition.insert(placeholderElement);
     
     // Make sure the draggable element is removed.
-    currentDraggable.remove();
+    draggable.remove();
     
     // When placeholder is shown, we clear the drag over elements so 
     // we have a fresh start of the counter whenever any other element is entered.
     _logger.finest('clearing dragOverElements {dragOverElements.length before clearing: ${currentDragOverElements.length}}');
-    currentDragOverElements.clear();
+    Timer.run(() => currentDragOverElements.clear());
   }
   
   /**

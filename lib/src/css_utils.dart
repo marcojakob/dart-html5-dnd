@@ -19,8 +19,8 @@ num getTopOffset(Element element) {
       - document.documentElement.client.top;
 }
 
-num getAbsoluteLeft(Element element) {
-  num absoluteLeft = element.offsetLeft;
+int getAbsoluteLeft(Element element) {
+  int absoluteLeft = element.offsetLeft;
   while (element.offsetParent != null) {
     element = element.offsetParent;
     absoluteLeft += element.offsetLeft - element.scrollLeft;
@@ -28,8 +28,8 @@ num getAbsoluteLeft(Element element) {
   return absoluteLeft;
 }
 
-num getAbsoluteTop(Element element) {
-  num absoluteTop = element.offsetTop;
+int getAbsoluteTop(Element element) {
+  int absoluteTop = element.offsetTop;
   while (element.offsetParent != null) {
     element = element.offsetParent;
     absoluteTop += element.offsetTop - element.scrollTop;
