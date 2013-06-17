@@ -12,8 +12,8 @@ part 'codeblocks.dart';
 
 main() {
   // Uncomment to enable logging.
-  Logger.root.onRecord.listen(new PrintHandler().call);
-  Logger.root.level = Level.FINEST;
+//  Logger.root.onRecord.listen(new PrintHandler().call);
+//  Logger.root.level = Level.FINEST;
   
   // Drag and Drop
   sectionDraggableAndDropzone();
@@ -28,7 +28,6 @@ main() {
   sectionSortableListExclude();
   sectionSortableListHandles();
   sectionSortableTwoGroups();
-  sectionDraggableSortable();
   
   installCodeblockTabs();
 }
@@ -44,7 +43,6 @@ installCodeblockTabs() {
   codeblockSortableListExclude(query('#sortable-list-exclude'));
   codeblockSortableListHandles(query('#sortable-list-handles'));
   codeblockSortableTwoGroups(query('#sortable-two-groups'));
-  codeblockDraggableSortable(query('#draggable-sortable'));
   
   List<AnchorElement> tabLinks = queryAll('.example-code .menu li a');
   for (AnchorElement link in tabLinks) {
@@ -149,17 +147,10 @@ sectionDragImages() {
     return new DragImage(canvasImage, 0, 0);
   };
   
-  DraggableGroup dragGroupFour = new DraggableGroup()
-  ..install(query('#drag-images .four'))
-  ..alwaysUseDragImagePolyfill = true
-  ..dragImageFunction = (Element draggable) {
-    return new DragImage(canvasImage, 0, 0);
-  };
-  
   // Install dropzone.
   DropzoneGroup dropGroup = new DropzoneGroup()
   ..install(query('#drag-images .dropzone'))
-  ..accept.addAll([dragGroupOne, dragGroupTwo, dragGroupThree, dragGroupFour]);
+  ..accept.addAll([dragGroupOne, dragGroupTwo, dragGroupThree]);
 }
 
 sectionNestedElements() {
@@ -254,34 +245,4 @@ sectionSortableTwoGroups() {
   // Only accept elements from this section.
   sortGroup1.accept.addAll([sortGroup1, sortGroup2]);
   sortGroup2.accept.addAll([sortGroup1, sortGroup2]);
-}
-
-sectionDraggableSortable() {
-  DraggableGroup dragGroup = new DraggableGroup()
-  ..installAll(queryAll('#draggable-sortable .group1 li'));
-
-  // Create sortable group with initially no installed elements.
-  SortableGroup sortGroup = new SortableGroup()
-  ..onSortUpdate.listen((SortableEvent event) {
-    event.originalGroup.uninstall(event.draggable);
-    event.newGroup.install(event.draggable);
-  });
-  sortGroup.accept.addAll([dragGroup, sortGroup]);
-  
-  LIElement emptyItem = query('#draggable-sortable .group2 .empty');
-  
-  // Install an empty item as a dropzone no element is in the list.
-  DropzoneGroup emptyListDropzone = new DropzoneGroup()
-  ..install(emptyItem)
-  ..accept.add(dragGroup)
-  ..onDrop.listen((DropzoneEvent event) {
-    // Hide empty item.
-    emptyItem.style.display = 'none';
-    
-    // Uninstall in old group and install in new group.
-    dragGroup.uninstall(event.draggable);
-    event.draggable.remove();
-    sortGroup.install(event.draggable);
-    query('#draggable-sortable .group2').children.add(event.draggable);
-  });
 }

@@ -193,9 +193,6 @@ codeblockDragImages(Element section) {
 <div class="dragme three">
   custom drawn canvas
 </div>
-<div class="dragme four">
-  Always uses Polyfill
-</div>
       ''', 
       // CSS
       '''
@@ -237,17 +234,10 @@ DraggableGroup dragGroupThree = new DraggableGroup()
   return new DragImage(canvasImage, 0, 0);
 };
 
-DraggableGroup dragGroupFour = new DraggableGroup()
-..install(query('#drag-images .four'))
-..alwaysUseDragImagePolyfill = true
-..dragImageFunction = (Element draggable) {
-  return new DragImage(canvasImage, 0, 0);
-};
-
 // Install dropzone.
 DropzoneGroup dropGroup = new DropzoneGroup()
 ..install(query('#drag-images .dropzone'))
-..accept.addAll([dragGroupOne, dragGroupTwo, dragGroupThree, dragGroupFour]);
+..accept.addAll([dragGroupOne, dragGroupTwo, dragGroupThree]);
   ''');
 }
 
@@ -526,91 +516,5 @@ SortableGroup sortGroup2 = new SortableGroup()
 // Only accept elements from this section.
 sortGroup1.accept.addAll([sortGroup1, sortGroup2]);
 sortGroup2.accept.addAll([sortGroup1, sortGroup2]);
-  ''');
-}
-
-codeblockDraggableSortable(Element section) {
-  _createCodeblock(section, 
-      // HTML
-      '''
-<ul class="example-box group1">
-  <li>Item 1</li>
-  <li>Item 2</li>
-  <li>Item 3</li>
-  <li>Item 4</li>
-  <li>Item 5</li>
-  <li>Item 6</li>
-</ul>
-<ul class="example-box group2">
-  <li class="empty">Empty list!</li>
-</ul>
-      ''', 
-      // CSS
-      '''
-#draggable-sortable {
-  height: 250px;
-}
-
-#draggable-sortable .dnd-placeholder {
-  border: 1px dashed #CCC;
-  background: none;  
-}
-
-#draggable-sortable .dnd-dragging {
-  opacity: 0.5;
-}
-
-#draggable-sortable .dnd-over {
-  background: #d387ca;
-}
-
-#draggable-sortable .group1 li {
-  cursor: move;
-}
-
-#draggable-sortable .group1 {
-  float: left;
-  width: 150px;
-}
-
-#draggable-sortable .group2 {
-  float: right;
-  width: 150px;
-}
-
-#draggable-sortable .group2 .empty {
-  border: 1px dashed #CCC;
-  color: #333;
-}
-      ''', 
-      // Dart
-      '''
-DraggableGroup dragGroup = new DraggableGroup()
-..installAll(queryAll('#draggable-sortable .group1 li'));
-
-// Create sortable group with initially no installed elements.
-SortableGroup sortGroup = new SortableGroup()
-..onSortUpdate.listen((SortableEvent event) {
-  event.originalGroup.uninstall(event.draggable);
-  event.newGroup.install(event.draggable);
-});
-sortGroup.accept.addAll([dragGroup, sortGroup]);
-
-LIElement emptyItem = query('#draggable-sortable .group2 .empty');
-
-// Install an empty item as a dropzone no element is in the list.
-DropzoneGroup emptyListDropzone = new DropzoneGroup()
-..install(emptyItem)
-..accept.add(dragGroup)
-..onDrop.listen((DropzoneEvent event) {
-  // Hide empty item.
-  emptyItem.style.display = 'none';
-  
-  // Uninstall in old group and install in new group.
-  dragGroup.uninstall(event.draggable);
-  event.draggable.remove();
-  sortGroup.install(event.draggable);
-  query('#draggable-sortable .group2').children.add(event.draggable);
-});
   ''');
 }

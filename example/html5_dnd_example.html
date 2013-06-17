@@ -45,6 +45,10 @@
           </li>
         </ul>
       </p>
+      <p>You are welcome to contribute by reporting an 
+      <a href="https://github.com/marcojakob/dart-html5-dnd/issues">Issue</a> 
+      or <a href="https://help.github.com/articles/fork-a-repo">forking the repository<a/>.
+      </p>
     </div>
     
     <h2>Draggable and Dropzone</h2>
@@ -61,15 +65,15 @@
     
     <h2>Dragging Divs</h2>
     <p>
-      All HTML elements with the `draggable="true"` attribute can be dragged - 
+      All HTML elements with the <em>draggable="true"</em> attribute can be dragged - 
       well...almost. Internet Explorer 9 does not support this attribute and 
-      thus by default only links and images are draggable in IE9. With a decent
+      thus by default only links and images are draggable in IE9. With a
       <a href="http://stackoverflow.com/a/8986075/862411">workaround</a>, we 
       can also tell IE9 to drag anything. Try the following example in IE9.
     </p>
     <p>
-      <strong>Note:</strong> The `draggable="true"` attribute is automatically
-      added by the `Draggable` class, so there is no need to set it in HTML.
+      <strong>Note:</strong> The <em>draggable="true"</em> attribute is automatically
+      added to draggables, so there is no need to set it in HTML.
     </p>
     <div id="dragging-divs" class="example-container">
       <div class="dragme">
@@ -98,8 +102,7 @@
     <h2>Custom Drag Images</h2>
     <p>
       That was a tough one to make work cross-browser! IE9 and IE10 do not 
-      support setting a custom drag image (as other modern browsers do). IE 
-      always creates a drag image from the element that the user picks up. 
+      support setting a custom drag image (as other modern browsers do). 
     </p>
     <p>
       So I had to implement a <strong>polyfill</strong> that draws a custom 
@@ -109,12 +112,7 @@
       default image does not show, 2. draw the custom image, 3. ensure the mouse 
       events are passed through to the layer underneath the drag image... more 
       info in the source).
-    </p>
-    <p>
-      <strong>Note:</strong> The polyfill for drag images is automatically used
-      if the browser does not support it. But you can use the polyfill for any
-      browser by setting `alwaysUseDragImagePolyfill = true` on the `Draggable`.
-    </p>      
+    </p>     
     <div id="drag-images" class="example-container">
       <div class="dropzone example-box">
         Drag here!
@@ -127,9 +125,6 @@
       </div>
       <div class="dragme three">
         custom drawn canvas
-      </div>
-      <div class="dragme four">
-        Always uses Polyfill
       </div>
     </div>
     
@@ -245,28 +240,10 @@
         <li class="other">Item 6</li>
       </ul>
     </div>
-    
-    <h2>Draggables and a Sortable Group</h2>
-    <p>
-      The draggable elements on the left can be dragged into the sortable group
-      on the right.
-    </p>
-    <div id="draggable-sortable" class="example-container">
-      <ul class="example-box group1">
-        <li>Item 1</li>
-        <li>Item 2</li>
-        <li>Item 3</li>
-        <li>Item 4</li>
-        <li>Item 5</li>
-        <li>Item 6</li>
-      </ul>
-      <ul class="example-box group2">
-        <li class="empty">Empty list!</li>
-      </ul>
-    </div>
   </article>
   
   <script type="application/dart" src="html5_dnd_example.dart"></script>
   <script src="packages/browser/dart.js"></script>
+  <script src="packages/browser/interop.js"></script>
 </body>
 </html>

@@ -4,12 +4,11 @@ HTML5 Drag and Drop for Dart
 Helper library to simplify **Native HTML5 Drag and Drop** in Dart.
 
 ## Features ##
-* Make any HTML Element `Draggable`.
-* Create `Dropzone`s and connect them with `Draggable`s.
-* Sortable (similar to jQuery UI Sortable).
+* Make any HTML Element `draggable`.
+* Create `dropzone`s and connect them with `draggable`s.
+* `Sortable` (similar to jQuery UI Sortable).
 * Uses fast native HTML5 Drag and Drop of the browser.
-* Same functionality and API for IE9+, Firefox, Chrome. (Safari and Opera have 
-  not been tested yet, let me know if it works). 
+* Same functionality and API for IE9+, Firefox, Chrome and Safari.
 
 ## Demo ##
 See [HTML5 Drag and Drop in action](http://edu.makery.ch/projects/dart-html5-drag-and-drop) (with code examples).
@@ -54,7 +53,7 @@ I'd like to thank the people who kindly helped me with their answers or put
 some tutorial or code examples online. They've already contributed to this 
 project.
 
-If you'd like to contribute, you're welcome to file issues or 
+If you'd like to contribute, you're welcome to report issues or 
 [fork](https://help.github.com/articles/fork-a-repo) my 
 [repository on GitHub](https://github.com/marcojakob/dart-html5-dnd).
 

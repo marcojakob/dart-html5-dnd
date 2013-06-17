@@ -13,3 +13,9 @@ Changelog
   dragged element and the new group it was dragged to. This enables 
   uninstalling in the previous group and installing in the new group.
 * Other minor improvements in Sortable.
+
+## Version 0.2.1 (2013-06-17) ##
+* Fix Issue #6: Bug in Firefox when dragging over nested elements
+* Fix Issue #1: overClass (.dnd-over) stays after drag ended
+* Fix Issue #4: Support any HTML Element as drag image
+* Fix Issue #5: Always use Drag Image Polyfill for IE9 drags
