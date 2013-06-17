@@ -40,7 +40,7 @@ class DraggableGroup extends Group {
    * returns 'text' as type with an empty String as data.
    */
   DragDataFunction dragDataFunction = (Element draggable) {
-    return {'text': ''};
+    return {'Text': ' '};
   };
   
   /**
@@ -400,10 +400,11 @@ class DragImage {
       // Make sure that mouse events are forwarded to the layer below.
       if (html5.supportsPointerEvents) {
         _polyfill = image;
-        _polyfill.style.pointerEvents = 'none';
       } else {
+        // IE9 and IE10 support pointer-events on SVGs only.
         _polyfill = _createSvgElement();
       }
+      _polyfill.style.pointerEvents = 'none';
       
       // Add some transparency.
       _polyfill.style.opacity = polyfillOpacity;
@@ -429,8 +430,6 @@ class DragImage {
           height="${image.height}" 
           />
         </svg>
-    """)
-    // Event IE9 and IE10 support pointer-events on SVGs.
-    ..style.pointerEvents = 'none';
+    """);
   }
 }

@@ -96,14 +96,21 @@ class DropzoneGroup extends Group {
         return; // Return here as drop is not accepted.
       }
       
-      _logger.finest('onDragEnter {dragOverElements.length before adding: ${currentDragOverElements.length}}');
-      currentDragOverElements.add(mouseEvent.target);
-      
       // Only handle dropzone element itself and not any of its children.
-      if (currentDragOverElements.length == 1) {
+      if (currentDragOverElements.isEmpty) {
         _logger.finest('firing onDragEnter');
         if (currentDraggableGroup.overClass != null) {
-          element.classes.add(currentDraggableGroup.overClass);
+          String overClass = currentDraggableGroup.overClass;
+          element.classes.add(overClass);
+          
+          // Make sure overClass is removed when drag ended. Is necessary 
+          // because if drag is aborted (e.g. with esc-key), no dragLeave or
+          // drop event is fired on the dropzone.
+          StreamSubscription dragEndSub;
+          dragEndSub = currentDraggable.onDragEnd.listen((_) {
+            element.classes.remove(overClass);
+            dragEndSub.cancel();
+          });
         }
         
         if (_onDragEnter != null) {
@@ -111,6 +118,9 @@ class DropzoneGroup extends Group {
               element, mouseEvent));
         }
       }
+      
+      _logger.finest('onDragEnter {dragOverElements.length before adding: ${currentDragOverElements.length}}');
+      currentDragOverElements.add(mouseEvent.target);
     }));
     
     // Drag Over.
@@ -141,8 +151,8 @@ class DropzoneGroup extends Group {
       
       // Firefox fires too many onDragLeave events. This condition fixes it. 
       if (mouseEvent.target != mouseEvent.relatedTarget) {
-        _logger.finest('onDragLeave {dragOverElements.length before removing: ${currentDragOverElements.length}}');
         currentDragOverElements.remove(mouseEvent.target);
+        _logger.finest('onDragLeave {dragOverElements.length after removing: ${currentDragOverElements.length}}');
       }
       
       // Only handle on dropzone element and not on any of its children.
@@ -166,10 +176,6 @@ class DropzoneGroup extends Group {
       
       // Stops browsers from redirecting.
       mouseEvent.preventDefault(); 
-      
-      if (currentDraggableGroup.overClass != null) {
-        element.classes.remove(currentDraggableGroup.overClass);
-      }
       
       if (_onDrop != null) {
         _onDrop.add(new DropzoneEvent(currentDraggable, element, 

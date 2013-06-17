@@ -33,6 +33,9 @@ DraggableGroup currentDraggableGroup;
 /// was fired on the real [dropzoneElement] and not on its children.
 Set<Element> currentDragOverElements = new Set<Element>();
 
+/**
+ * Abstract superclass for all groups containing drag and drop elements.
+ */
 abstract class Group {
   /// Map of all installed elements inside this group with their subscriptions.
   Map<Element, List<StreamSubscription>> installedElements = 
@@ -70,5 +73,4 @@ abstract class Group {
   void uninstallAll(List<Element> elements) {
     elements.forEach((Element e) => uninstall(e));
   }
-  
 }

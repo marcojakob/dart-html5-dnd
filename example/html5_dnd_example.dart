@@ -12,8 +12,8 @@ part 'codeblocks.dart';
 
 main() {
   // Uncomment to enable logging.
-//  Logger.root.onRecord.listen(new PrintHandler().call);
-//  Logger.root.level = Level.FINEST;
+  Logger.root.onRecord.listen(new PrintHandler().call);
+  Logger.root.level = Level.FINEST;
   
   // Drag and Drop
   sectionDraggableAndDropzone();

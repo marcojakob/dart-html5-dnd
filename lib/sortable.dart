@@ -76,8 +76,13 @@ class SortableGroup extends DraggableGroup {
    */
   SortableGroup({String handle}) :
     _dropzoneGroup = new DropzoneGroup(),
-    super(handle: handle);
-    
+    super(handle: handle) {
+    // Disable overClass by default for sortable as we're usually only over the 
+    // placeholder and not over a dropzone. Same for draggingClass as the 
+    // dragged element is replaced by the placeholder and thus not visible.
+    overClass = null;
+    draggingClass = null;
+  }
   
   /**
    * Installs sortable behaviour on [element] and registers it in this group.
