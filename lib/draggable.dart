@@ -208,7 +208,7 @@ class DraggableGroup extends Group {
               mouseEvent, dragImage);
         }
       } else if (!html5.supportsDraggable) {
-        // Browser does not create a drag image by default --> polyfill it.
+        // No dragImage and browser does not create a drag image by default --> polyfill it.
         _logger.finest('Manually creating drag image from current drag element.');
         usingDragImagePolyfill = true;
         
