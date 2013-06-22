@@ -32,7 +32,6 @@ int getElementIndexInParent(Element element) {
  * IE9 will return false.
  */
 bool get supportsDraggable {
-  return false;
   if (_supportsDraggable == null) {
     _supportsDraggable = new Element.tag('span').draggable != null;
     _logger.finest('Browser support for HTML5 draggable: $_supportsDraggable.');
@@ -45,11 +44,10 @@ bool get supportsDraggable {
  * IE9 and IE10 will return false.
  */
 bool get supportsSetDragImage {
-  return false;
   if (_supportsSetDragImage == null) {
     // TODO: We should do feature detection instead of browser detection here
     // but there currently is no way in Dart.
-    // TODO: Keep an eye on IE11
+    // TODO: Keep an eye on IE11.
     
     // Detect Internet Explorer (which does not support HTML5 setDragImage).
     if (isInternetExplorer) {

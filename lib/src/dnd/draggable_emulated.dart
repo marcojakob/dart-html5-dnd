@@ -21,9 +21,7 @@ StreamSubscription _subMouseMove;
 
 bool _emulDragStarted = false;
 DragImage _emulDragImage;
-
 EventTarget _emulPrevMouseTarget;
-
 Element _emulPrevCursorElement;
 String _emulPrevCursorElementCursor;
 
@@ -108,13 +106,13 @@ void _emulateDragStart(Element element, DraggableGroup group, MouseEvent mouseDo
   // Add drag image.
   _emulDragImage._addEmulatedDragImage(element);
   
-  group._handleDragStart(element, mouseDownEvent);
+  group._handleDragStart(element, mouseDownEvent.page, mouseDownEvent.client);
 }
 
 void _emulateDrag(Element element, DraggableGroup group, MouseEvent moveEvent) {
   _emulDragImage._updateEmulatedDragImagePosition(moveEvent.page);
   
-  group._handleDrag(element, moveEvent);
+  group._handleDrag(element, moveEvent.page, moveEvent.client);
 }
 
 void _emulateDragEnd(Element element, DraggableGroup group) {
@@ -139,9 +137,10 @@ void _emulateDragEnd(Element element, DraggableGroup group) {
       _emulDragImage._removeEumlatedDragImage();
       
       if (event is MouseEvent) {
-        group._handleDragEnd(element, event);
+        group._handleDragEnd(element, event.page, event.client);
       } else {
-        group._handleDragEnd(element);
+        // We do not have a valid mouse position.
+        group._handleDragEnd(element, const Point(0, 0), const Point(0, 0));
       }
     }
     
@@ -160,7 +159,7 @@ void _emulateDragEnd(Element element, DraggableGroup group) {
       // Forward event on the drag image to element underneath.
       target = _getElementUnder(upEvent);
     }
-    target.dispatchEvent(_newMouseEvent(upEvent, EMULATED_DROP));    
+    target.dispatchEvent(_createEmulatedMouseEvent(upEvent, EMULATED_DROP));    
     
     dragEndFunc(upEvent);
   });
@@ -190,22 +189,23 @@ void _fireEventsForDropzone(MouseEvent mouseEvent) {
     // Mouse was moved on the same element --> fire dragOver.
     _setNoDropCursor(mouseEvent.target);
     target.dispatchEvent(
-        _newMouseEvent(mouseEvent, EMULATED_DRAG_OVER, mouseEvent.target));
+        _createEmulatedMouseEvent(mouseEvent, EMULATED_DRAG_OVER, mouseEvent.target));
+    
   } else {
     // Mouse entered a new element --> fire dragEnter.
     target.dispatchEvent(
-        _newMouseEvent(mouseEvent, EMULATED_DRAG_ENTER, _emulPrevMouseTarget));
+        _createEmulatedMouseEvent(mouseEvent, EMULATED_DRAG_ENTER, _emulPrevMouseTarget));
     
     if (_emulPrevMouseTarget != null) {
       // Mouse left the previous element --> fire dragLeave.
       _emulPrevMouseTarget.dispatchEvent(
-          _newMouseEvent(mouseEvent, EMULATED_DRAG_LEAVE, target));
+          _createEmulatedMouseEvent(mouseEvent, EMULATED_DRAG_LEAVE, target));
     }
     
     // Also fire the first dragOver event for the new element.
     _setNoDropCursor(mouseEvent.target, force: true);
     target.dispatchEvent(
-        _newMouseEvent(mouseEvent, EMULATED_DRAG_OVER, mouseEvent.target));
+        _createEmulatedMouseEvent(mouseEvent, EMULATED_DRAG_OVER, mouseEvent.target));
     
     _emulPrevMouseTarget = target;
   }
@@ -241,7 +241,7 @@ void _setNoDropCursor(EventTarget target, {bool force: false}) {
 }
 
 /**
- * Removes 'no-drop' cursor on [_emulPrevCursorElement] and set it to it's
+ * Removes 'no-drop' cursor on [_emulPrevCursorElement] and set it to its
  * original value.
  */
 void _restoreCursor() {
@@ -275,14 +275,20 @@ EventTarget _getElementUnder(MouseEvent event) {
 }
 
 /**
- * Creates a new event from [e] with the [newType].
+ * Creates a [CustomEvent] of type [type] with properties from [e].
+ * 
+ * **Important!** There is currently no way to set the event's pageX and pageY
+ * property. Because we need this, we abuse screenX and screenY for the pageX
+ * and pageY property!
+ * TODO: Fix this once https://code.google.com/p/dart/issues/detail?id=11452
+ * is fixed!!
  */
-MouseEvent _newMouseEvent(MouseEvent e, String newType, [EventTarget relatedTarget]) {
-  return new MouseEvent(newType, 
-      view: e.view, detail: e.detail, screenX: e.screen.x, 
-      screenY: e.screen.y, clientX: e.client.x, clientY: e.client.y, 
+MouseEvent _createEmulatedMouseEvent(MouseEvent e, String type, [EventTarget relatedTarget]) {
+  return new MouseEvent(type, 
+      view: e.view, detail: e.detail, screenX: e.page.x, 
+      screenY: e.page.y, clientX: e.client.x, clientY: e.client.y, 
       button: e.button, canBubble: e.bubbles, cancelable: e.cancelable, 
       ctrlKey: e.ctrlKey, altKey: e.altKey, shiftKey: e.shiftKey, 
       metaKey: e.metaKey, 
       relatedTarget: relatedTarget);
-} 
+}

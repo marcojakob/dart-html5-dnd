@@ -344,7 +344,7 @@ class _Placeholder {
     _placeholderDropzoneGroup.install(placeholderElement);
     
     if (newGroup.placeholderClass != null) {
-      // The placeholder receives the placeholderClass CSS from it's current group.
+      // The placeholder receives the placeholderClass CSS from its current group.
       placeholderElement.classes.add(newGroup.placeholderClass);
     }
     
@@ -397,12 +397,13 @@ class _Placeholder {
    * in the disabled region of the bigger [dropzone].
    */
   void _showPlaceholderForBiggerDropzone(Element dropzone, 
-                                        Point mousePagePosition) {
+                                         Point mousePagePosition) {
     Position dropzonePosition = new Position(dropzone.parent,
         html5.getElementIndexInParent(dropzone));
     
     if (_isDropzoneHigher(dropzone)) {
-      if (_isInDisabledVerticalRegion(dropzone, dropzonePosition, mousePagePosition)) {
+      if (_isInDisabledVerticalRegion(dropzone, dropzonePosition,
+          mousePagePosition)) {
         return;
       }
     }
@@ -470,7 +471,7 @@ class _Placeholder {
       // --> Disabled region is in the bottom part of the dropzone.
       
       // Calc the mouse position relative to the dropzone.
-      num mouseRelativeTop = mousePagePosition.y - css.getTopOffset(dropzone);  
+      num mouseRelativeTop = mousePagePosition.y - css.pageOffset(dropzone).y;
       if (mouseRelativeTop > placeholderElement.clientHeight) {
         return true; // In disabled region.
       }
@@ -485,7 +486,7 @@ class _Placeholder {
   bool _isInDisabledHorizontalRegion(Element dropzone, Position dropzonePosition, 
                                      Point mousePagePosition) {
     // Calc the mouse position relative to the dropzone.
-    num mouseRelativeLeft = mousePagePosition.x - css.getLeftOffset(dropzone);      
+    num mouseRelativeLeft = mousePagePosition.x - css.pageOffset(dropzone).x;      
     
     if (newPosition != null 
         && newPosition.parent == dropzonePosition.parent) {

@@ -18,17 +18,19 @@ List<StreamSubscription> _installEmulatedDropzone(Element element, DropzoneGroup
     // Test if this dropzone accepts the current draggable.
     draggableAccepted = group._draggableAccepted();
     if (!draggableAccepted) return;
-
+    
     _logger.finest('emulated dragEnter');
     
     if (!element.contains(mouseEvent.relatedTarget)) {
       // Mouse was moved from outside and might have skipped some elements. 
       // Must clear the drag over elements.
-      _logger.finest('relatedTarget is not a child of element having the listener, mouse was moved from outside.');
+      _logger.finest('relatedTarget is not a child of element having the listener, clearing dragOverElements.');
       currentDragOverElements.clear();
     }
     
-    group._handleDragEnter(element, mouseEvent);
+    // screenX and screenY were abused as pageX and pageY! TODO: Wait for #11452 to be fixed.
+    Point mousePagePosition = mouseEvent.screen;
+    group._handleDragEnter(element, mousePagePosition, mouseEvent.client, mouseEvent.target);
   }));
   
   // -------------------
@@ -56,7 +58,10 @@ List<StreamSubscription> _installEmulatedDropzone(Element element, DropzoneGroup
           elementUnderMouse.style.cursor = 'no-drop';
       }
     }
-    group._handleDragOver(element, mouseEvent);
+    
+    // screenX and screenY were abused as pageX and pageY! TODO: Wait for #11452 to be fixed.
+    Point mousePagePosition = mouseEvent.screen;
+    group._handleDragOver(element, mousePagePosition, mouseEvent.client);
   }));
   
   // -------------------
@@ -66,7 +71,11 @@ List<StreamSubscription> _installEmulatedDropzone(Element element, DropzoneGroup
     if (!draggableAccepted) return;
     
     _logger.finest('emulated dragLeave');
-    group._handleDragLeave(element, mouseEvent);
+    
+    // screenX and screenY were abused as pageX and pageY! TODO: Wait for #11452 to be fixed.
+    Point mousePagePosition = mouseEvent.screen;
+    group._handleDragLeave(element, mousePagePosition, mouseEvent.client,
+        mouseEvent.target, mouseEvent.relatedTarget);
   }));
   
   // -------------------
@@ -76,7 +85,10 @@ List<StreamSubscription> _installEmulatedDropzone(Element element, DropzoneGroup
     if (!draggableAccepted || !group._dropAllowed()) return;
     
     _logger.finest('emulated drop');
-    group._handleDrop(element, mouseEvent);
+    
+    // screenX and screenY were abused as pageX and pageY! TODO: Wait for #11452 to be fixed.
+    Point mousePagePosition = mouseEvent.screen;
+    group._handleDrop(element, mousePagePosition, mouseEvent.client);
   }));
   
   return subs;

@@ -89,7 +89,8 @@ class DropzoneGroup extends Group {
     installedElements[element].addAll(subs);
   }
   
-  void _handleDragEnter(Element element, MouseEvent mouseEvent) {
+  void _handleDragEnter(Element element, Point mousePagePosition, 
+                        Point mouseClientPosition, EventTarget target) {
     _logger.finest('handleDragEnter {dragOverElements.length: ${currentDragOverElements.length}}');
     
     // Only handle dropzone element itself and not any of its children.
@@ -110,24 +111,26 @@ class DropzoneGroup extends Group {
       
       if (_onDragEnter != null) {
         _onDragEnter.add(new DropzoneEvent(currentDraggable, 
-            element, mouseEvent.page, mouseEvent.client));
+            element, mousePagePosition, mouseClientPosition));
       }
     }
     
-    currentDragOverElements.add(mouseEvent.target);
+    currentDragOverElements.add(target);
   }
   
-  void _handleDragOver(Element element, MouseEvent mouseEvent) {
+  void _handleDragOver(Element element, Point mousePagePosition, Point mouseClientPosition) {
     if (_onDragOver != null) {
       _onDragOver.add(new DropzoneEvent(currentDraggable, element, 
-          mouseEvent.page, mouseEvent.client));
+          mousePagePosition, mouseClientPosition));
     }
   }
   
-  void _handleDragLeave(Element element, MouseEvent mouseEvent) {
+  void _handleDragLeave(Element element, Point mousePagePosition, 
+                        Point mouseClientPosition, EventTarget target,
+                        EventTarget relatedTarget) {
     // Firefox fires too many onDragLeave events. This condition fixes it. 
-    if (mouseEvent.target != mouseEvent.relatedTarget) {
-      currentDragOverElements.remove(mouseEvent.target);
+    if (target != relatedTarget) {
+      currentDragOverElements.remove(target);
     }
     _logger.finest('handleDragLeave {dragOverElements.length: ${currentDragOverElements.length}}');
     
@@ -139,15 +142,15 @@ class DropzoneGroup extends Group {
       
       if (_onDragLeave != null) {
         _onDragLeave.add(new DropzoneEvent(currentDraggable, element,
-            mouseEvent.page, mouseEvent.client));
+            mousePagePosition, mouseClientPosition));
       }
     }
   }
   
-  void _handleDrop(Element element, MouseEvent mouseEvent) {
+  void _handleDrop(Element element, Point mousePagePosition, Point mouseClientPosition) {
     if (_onDrop != null) {
       _onDrop.add(new DropzoneEvent(currentDraggable, element, 
-          mouseEvent.page, mouseEvent.client));
+          mousePagePosition, mouseClientPosition));
     }
   }
   
@@ -199,7 +202,8 @@ List<StreamSubscription> _installDropzone(Element element, DropzoneGroup group) 
     
     _logger.finest('dragEnter');
 
-    group._handleDragEnter(element, mouseEvent);
+    group._handleDragEnter(element, mouseEvent.page, mouseEvent.client, 
+        mouseEvent.target);
   }));
   
   // -------------------
@@ -219,7 +223,7 @@ List<StreamSubscription> _installDropzone(Element element, DropzoneGroup group) 
     // This is necessary to allow us to drop.
     mouseEvent.preventDefault();
     
-    group._handleDragOver(element, mouseEvent);
+    group._handleDragOver(element, mouseEvent.page, mouseEvent.client);
   }));
   
   // -------------------
@@ -231,7 +235,8 @@ List<StreamSubscription> _installDropzone(Element element, DropzoneGroup group) 
     
     _logger.finest('dragLeave');
     
-    group._handleDragLeave(element, mouseEvent);
+    group._handleDragLeave(element, mouseEvent.page, mouseEvent.client,
+        mouseEvent.target, mouseEvent.relatedTarget);
   }));
   
   // -------------------
@@ -245,7 +250,7 @@ List<StreamSubscription> _installDropzone(Element element, DropzoneGroup group) 
     // Stops browsers from redirecting.
     mouseEvent.preventDefault(); 
     
-    group._handleDrop(element, mouseEvent);
+    group._handleDrop(element, mouseEvent.page, mouseEvent.client);
   }));
   
   return subs;

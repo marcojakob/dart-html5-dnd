@@ -145,7 +145,7 @@ class DraggableGroup extends Group {
   /**
    * Adds the CSS classes and fires dragStart event.
    */
-  void _handleDragStart(Element element, MouseEvent mouseEvent) {
+  void _handleDragStart(Element element, Point mousePagePosition, Point mouseClientPosition) {
     currentDraggable = element;
     currentDraggableGroup = this;
     
@@ -162,23 +162,24 @@ class DraggableGroup extends Group {
     }
     
     if (_onDragStart != null) {
-      _onDragStart.add(new DraggableEvent(element, mouseEvent.page, mouseEvent.client));
+      _onDragStart.add(new DraggableEvent(element, mousePagePosition, mouseClientPosition));
     }
   }
   
   /**
    * Fires drag event.
    */
-  void _handleDrag(Element element, MouseEvent mouseEvent) {
+  void _handleDrag(Element element, Point mousePagePosition, Point mouseClientPosition) {
     if (_onDrag != null) {
-      _onDrag.add(new DraggableEvent(element, mouseEvent.page, mouseEvent.client));
+      _onDrag.add(new DraggableEvent(element, mousePagePosition, mouseClientPosition));
     }
   }
   
   /**
    * Removes CSS classes and fires dragEnd event.
    */
-  void _handleDragEnd(Element element, [MouseEvent mouseEvent]) {
+  void _handleDragEnd(Element element, Point mousePagePosition, 
+                      Point mouseClientPosition) {
     // Remove CSS classes.
     if (draggingClass != null) {
       element.classes.remove(draggingClass);
@@ -188,9 +189,8 @@ class DraggableGroup extends Group {
     }
     
     if (_onDragEnd != null) {
-      _onDragEnd.add(new DraggableEvent(element, 
-          mouseEvent != null ? mouseEvent.page : null, 
-          mouseEvent != null ? mouseEvent.client : null));
+      _onDragEnd.add(new DraggableEvent(element, mousePagePosition, 
+          mouseClientPosition));
     }
     
     // Reset variables.
@@ -256,7 +256,7 @@ List<StreamSubscription> _installDraggable(Element element, DraggableGroup group
           dragImage.y);
     }
     
-    group._handleDragStart(element, mouseEvent);
+    group._handleDragStart(element, mouseEvent.page, mouseEvent.client);
   }));
   
   // -------------------
@@ -266,7 +266,7 @@ List<StreamSubscription> _installDraggable(Element element, DraggableGroup group
     // Do nothing if no element of this dnd is dragged.
     if (currentDraggable == null) return;
     
-    group._handleDrag(element, mouseEvent);
+    group._handleDrag(element, mouseEvent.page, mouseEvent.client);
   }));
   
   // -------------------
@@ -277,7 +277,7 @@ List<StreamSubscription> _installDraggable(Element element, DraggableGroup group
     if (currentDraggable == null) return;
     _logger.finest('dragEnd');
 
-    group._handleDragEnd(element, mouseEvent);
+    group._handleDragEnd(element, mouseEvent.page, mouseEvent.client);
     
     // Reset variables.
     isHandle = false;
@@ -336,8 +336,9 @@ class DragImage {
    */
   DragImage._forDraggable(Element draggable, Point mousePosition) {
     // Calc the mouse position relative to the draggable.
-    this.x = (mousePosition.x - css.getLeftOffset(draggable)).round(); 
-    this.y = (mousePosition.y - css.getTopOffset(draggable)).round(); 
+    Point draggableOffset = css.pageOffset(draggable);
+    this.x = (mousePosition.x - draggableOffset.x).round(); 
+    this.y = (mousePosition.y - draggableOffset.y).round(); 
     
     // Create a clone of the draggable.
     if (draggable is ImageElement) {
