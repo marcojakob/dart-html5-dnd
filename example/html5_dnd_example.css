@@ -10,16 +10,15 @@ body {
 
 article {
   display: block;
-  margin-left: 10%;
-  margin-right: 10%;
+  margin-left: 10%; /* remove for website */
+}
+
+h1 {
+  margin-left: 10%; /* remove for website */
 }
 
 article p {
   width: 400px;
-}
-
-h1 {
-  margin-left: 10%;
 }
   
 h1, h2 {

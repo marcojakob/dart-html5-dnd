@@ -7,16 +7,18 @@ library html5_dnd;
 import 'dart:html';
 import 'dart:async';
 import 'dart:collection';
+import 'dart:math' as math;
 import 'dart:svg' as svg;
 import 'package:meta/meta.dart';
-import 'package:js/js.dart' as js;
 import 'package:logging/logging.dart';
 
 import 'package:html5_dnd/src/css_utils.dart' as css;
 import 'package:html5_dnd/src/html5_utils.dart' as html5;
 
-part 'draggable.dart';
-part 'dropzone.dart';
+part 'src/dnd/draggable.dart';
+part 'src/dnd/draggable_emulated.dart';
+part 'src/dnd/dropzone.dart';
+part 'src/dnd/dropzone_emulated.dart';
 
 final _logger = new Logger("html5_dnd");
 
@@ -26,12 +28,12 @@ Element currentDraggable;
 /// The [DraggableGroup] the [currentDraggable] belongs to.
 DraggableGroup currentDraggableGroup;
 
-/// Keep track of [Element]s where dragEnter or dragLeave has been fired on.
+/// Keep track of [EventTarget]s where dragEnter or dragLeave has been fired on.
 /// This is necessary as a dragEnter or dragLeave event is not only fired
 /// on the [dropzoneElement] but also on its children. Now, whenever the 
 /// [dragOverElements] is empty we know the dragEnter or dragLeave event
 /// was fired on the real [dropzoneElement] and not on its children.
-Set<Element> currentDragOverElements = new Set<Element>();
+Set<EventTarget> currentDragOverElements = new Set<EventTarget>();
 
 /**
  * Abstract superclass for all groups containing drag and drop elements.

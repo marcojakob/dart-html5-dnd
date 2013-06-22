@@ -3,12 +3,12 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/> 
+  <base target="_parent" /> <!-- to open links when used in iFrame -->
+  
   <title>Dart HTML5 Drag and Drop</title>
   
   <link rel="stylesheet" href="html5_dnd_example.css">
-  
-  <!-- Script to make HTML5 drag and drop work in IE -->
-  <script type="text/javascript" src="packages/html5_dnd/dnd.polyfill.js"></script>
 </head>
 <body>
   <header>
@@ -47,7 +47,7 @@
       </p>
       <p>You are welcome to contribute by reporting an 
       <a href="https://github.com/marcojakob/dart-html5-dnd/issues">Issue</a> 
-      or <a href="https://help.github.com/articles/fork-a-repo">forking the repository<a/>.
+      or <a href="https://help.github.com/articles/fork-a-repo">forking the repository</a>.
       </p>
     </div>
     
@@ -244,6 +244,5 @@
   
   <script type="application/dart" src="html5_dnd_example.dart"></script>
   <script src="packages/browser/dart.js"></script>
-  <script src="packages/browser/interop.js"></script>
 </body>
 </html>

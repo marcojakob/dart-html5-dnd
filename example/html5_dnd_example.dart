@@ -12,8 +12,8 @@ part 'codeblocks.dart';
 
 main() {
   // Uncomment to enable logging.
-//  Logger.root.onRecord.listen(new PrintHandler().call);
-//  Logger.root.level = Level.FINEST;
+  Logger.root.onRecord.listen(new PrintHandler().call);
+  Logger.root.level = Level.FINEST;
   
   // Drag and Drop
   sectionDraggableAndDropzone();
@@ -93,20 +93,20 @@ sectionDraggingDivs() {
 sectionDropEffects() {
   // Install draggables.
   DraggableGroup dragGroupMove = new DraggableGroup()
-  ..install(query('#drop-effects .move'))
-  ..dropEffect = 'move';
+  ..dropEffect = 'move'
+  ..install(query('#drop-effects .move'));
   
   DraggableGroup dragGroupCopy = new DraggableGroup()
-  ..install(query('#drop-effects .copy'))
-  ..dropEffect = 'copy';
+  ..dropEffect = 'copy'
+  ..install(query('#drop-effects .copy'));
   
   DraggableGroup dragGroupLink = new DraggableGroup()
-  ..install(query('#drop-effects .link'))
-  ..dropEffect = 'link';
+  ..dropEffect = 'link'
+  ..install(query('#drop-effects .link'));
   
   DraggableGroup dragGroupNone = new DraggableGroup()
-  ..install(query('#drop-effects .none'))
-  ..dropEffect = 'none';
+  ..dropEffect = 'none'
+  ..install(query('#drop-effects .none'));
   
   // Install dropzone.
   DropzoneGroup dropGroup = new DropzoneGroup()
@@ -129,23 +129,17 @@ sectionDragImages() {
   ImageElement canvasImage = new ImageElement(src: dataUrl);
   
   // Install draggables.
-  DraggableGroup dragGroupOne = new DraggableGroup()
-  ..install(query('#drag-images .one'))
-  ..dragImageFunction = (Element draggable) {
-    return new DragImage(png, 40, 40);
-  };
+  DraggableGroup dragGroupOne = new DraggableGroup(
+      dragImageFunction: (Element draggable) => new DragImage(png, 40, 40))
+  ..install(query('#drag-images .one'));
   
-  DraggableGroup dragGroupTwo = new DraggableGroup()
-  ..install(query('#drag-images .two'))
-  ..dragImageFunction = (Element draggable) {
-    return new DragImage(png, -20, -20);
-  };
+  DraggableGroup dragGroupTwo = new DraggableGroup(
+      dragImageFunction: (Element draggable) => new DragImage(png, -20, -20))
+  ..install(query('#drag-images .two'));
   
-  DraggableGroup dragGroupThree = new DraggableGroup()
-  ..install(query('#drag-images .three'))
-  ..dragImageFunction = (Element draggable) {
-    return new DragImage(canvasImage, 0, 0);
-  };
+  DraggableGroup dragGroupThree = new DraggableGroup(
+  dragImageFunction: (Element draggable) => new DragImage(canvasImage, 20, 20))
+  ..install(query('#drag-images .three'));
   
   // Install dropzone.
   DropzoneGroup dropGroup = new DropzoneGroup()
@@ -199,8 +193,8 @@ sectionSortableList() {
 
 sectionSortableGrid() {
   SortableGroup sortGroup = new SortableGroup()
-  ..installAll(queryAll('#sortable-grid li'))
-  ..isGrid = true;
+  ..isGrid = true
+  ..installAll(queryAll('#sortable-grid li'));
   
   // Only accept elements from this section.
   sortGroup.accept.add(sortGroup);
@@ -232,11 +226,9 @@ sectionSortableTwoGroups() {
     event.newGroup.install(event.draggable);
   });
   
-  SortableGroup sortGroup2 = new SortableGroup()
+  SortableGroup sortGroup2 = new SortableGroup(
+      dragImageFunction: (Element draggable) => new DragImage(png, 5, 5))
   ..installAll(queryAll('#sortable-two-groups .group2 li'))
-  ..dragImageFunction = (Element draggable) {
-    return new DragImage(png, 0, 0);
-  }
   ..onSortUpdate.listen((SortableEvent event) {
     event.originalGroup.uninstall(event.draggable);
     event.newGroup.install(event.draggable);

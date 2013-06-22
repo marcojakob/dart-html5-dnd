@@ -2,14 +2,12 @@
 library html5_dnd.html5_utils;
 
 import 'dart:html';
-import 'package:js/js.dart' as js;
 import 'package:logging/logging.dart';
 
 final _logger = new Logger("html5_dnd.html5_utils");
 
 bool _supportsDraggable;
 bool _supportsSetDragImage;
-bool _supportsPointerEvents;
 bool _isInternetExplorer;
 
 /**
@@ -34,8 +32,10 @@ int getElementIndexInParent(Element element) {
  * IE9 will return false.
  */
 bool get supportsDraggable {
+  return false;
   if (_supportsDraggable == null) {
     _supportsDraggable = new Element.tag('span').draggable != null;
+    _logger.finest('Browser support for HTML5 draggable: $_supportsDraggable.');
   }
   return _supportsDraggable;
 }
@@ -45,52 +45,29 @@ bool get supportsDraggable {
  * IE9 and IE10 will return false.
  */
 bool get supportsSetDragImage {
+  return false;
   if (_supportsSetDragImage == null) {
-    try {
-      // Call via javascript function.
-      _supportsSetDragImage = js.context.supportsSetDragImage();
-    } on NoSuchMethodError {
-      _logger.severe('JavaScript method "supportsSetDragImage()" not found. Please load the file "dnd.polyfill.js" in your application html.');
+    // TODO: We should do feature detection instead of browser detection here
+    // but there currently is no way in Dart.
+    // TODO: Keep an eye on IE11
+    
+    // Detect Internet Explorer (which does not support HTML5 setDragImage).
+    if (isInternetExplorer) {
       _supportsSetDragImage = false;
-    } catch(e) {
-      _logger.severe('Calling "supportsSetDragImage()" via JavaScript failed: ' 
-          + e.toString());
-      _supportsSetDragImage = false;
+    } else {
+      _supportsSetDragImage = true;
     }
+    _logger.finest('Browser support for HTML5 setDragImage: $_supportsSetDragImage.');
   }
   return _supportsSetDragImage;
 }
 
 /**
- * Returns true if the CSS property 'pointer-events' is supported by the 
- * browser (detection technique from Modernizr). IE9 and IE10 will return false.
- */
-bool get supportsPointerEvents {
-  if (_supportsPointerEvents == null) {
-    Element el = new Element.tag('span');
-    el.style.cssText = 'pointer-events:auto';
-    _supportsPointerEvents = el.style.pointerEvents == 'auto';
-  }
-  return _supportsPointerEvents;
-}
-
-/**
- * Returns true if the browser is internet explorer.
+ * Returns true if the current browser is Internet Explorer.
  */
 bool get isInternetExplorer {
   if (_isInternetExplorer == null) {
-    try {
-      // Call via javascript function.
-      _isInternetExplorer = js.context.isInternetExplorer();
-    } on NoSuchMethodError {
-      _logger.severe('JavaScript method "isInternetExplorer()" not found. Please' 
-          + ' load the file "dnd.polyfill.js" in your application html.');
-      _lazyIsInternetExplorer = false;
-    } catch(e) {
-      _logger.severe('Calling "isInternetExplorer()" via JavaScript failed: ' 
-          + e.toString());
-      _isInternetExplorer = false;
-    }
+    _isInternetExplorer = window.navigator.appName == 'Microsoft Internet Explorer';
   }
   return _isInternetExplorer;
 }
