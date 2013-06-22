@@ -20,8 +20,9 @@
         Native HTML5 Drag and Drop is <a href="http://www.quirksmode.org/blog/archives/2009/09/the_html5_drag.html">
         not easy to work with</a>! The 
         <a href="https://github.com/marcojakob/dart-html5-dnd">Dart HTML5 Drag 
-        and Drop</a> library was created to make Drag and Drop fun again 
-        (hopefully). Here are some examples of how to use it.
+        and Drop</a> library was created to use HTML5 Drag and Drop in a 
+        consistend way across all modern browsers. Here are some examples of 
+        how to use it.
       </p>
       <p>
         API and Examples are inspired by 
@@ -66,10 +67,9 @@
     <h2>Dragging Divs</h2>
     <p>
       All HTML elements with the <em>draggable="true"</em> attribute can be dragged - 
-      well...almost. Internet Explorer 9 does not support this attribute and 
-      thus by default only links and images are draggable in IE9. With a 
-      <a href="http://stackoverflow.com/a/8986075/862411">workaround</a>, we 
-      can also tell IE9 to drag anything. Try the following example in IE9.
+      well...almost. Internet Explorer 9 does not support this attribute. To get the 
+      same behaviour for all browsers, drag and drop events are emulated in IE9. 
+      Try the following example in IE9.
     </p>
     <p>
       <strong>Note:</strong> The <em>draggable="true"</em> attribute is automatically
@@ -93,25 +93,21 @@
     </p>
     <div id="drop-effects" class="example-container">
       <div class="trash"></div>
-      <a href="#" class="move">move</a>
-      <a href="#" class="copy">copy</a>
-      <a href="#" class="link">link</a>
-      <a href="#" class="none">none</a>
+      <div class="dragme move">move</div>
+      <div class="dragme copy">copy</div>
+      <div class="dragme link">link</div>
+      <div class="dragme none">none</div>
     </div>
     
     <h2>Custom Drag Images</h2>
     <p>
-      That was a tough one to make work cross-browser! IE9 and IE10 do not 
-      support setting a custom drag image (as other modern browsers do). 
+      HTML5 drag and drop supports setting of custom drag images in place of the
+      auto-generated drag overlay.
     </p>
     <p>
-      So I had to implement a <strong>polyfill</strong> that draws a custom 
-      image and moves it around with the mouse (like jQuery and others do). The 
-      movement is not as smooth as with the native implementation but works 
-      quite well. (If you're curious how the polyfill works: 1. make sure the 
-      default image does not show, 2. draw the custom image, 3. ensure the mouse 
-      events are passed through to the layer underneath the drag image... more 
-      info in the source).
+      IE9 and IE10 do not support this. To get the same behaviour, a custom drag 
+      image is emulated: An image is manually created and moved together with
+      the mouse (similar to what jQuery IU does).
     </p>     
     <div id="drag-images" class="example-container">
       <div class="dropzone example-box">

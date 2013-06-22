@@ -33,6 +33,14 @@ h1, h2 {
 h2 {
   clear: both; 
 }
+
+/* Reset the img box for blog. */
+article img {
+  border-radius: 0;
+  box-shadow: none;
+  border: 0;
+  margin-bottom: 0;
+}
  
 .example-container {
   width: 306px;
@@ -239,7 +247,7 @@ h2 {
   background: url(icons/trash.png) top right no-repeat;
 }
 
-#drop-effects a {
+#drop-effects .dragme {
   background: url(icons/document.png) no-repeat;
   margin: 10px 0 0 5px;
   height: 60px;

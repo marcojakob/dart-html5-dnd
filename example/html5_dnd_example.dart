@@ -8,12 +8,12 @@ import 'package:logging/logging.dart';
 import 'package:html5_dnd/html5_dnd.dart';
 import 'package:html5_dnd/html5_sortable.dart';
 
-part 'codeblocks.dart';
+//part 'codeblocks.dart';
 
 main() {
   // Uncomment to enable logging.
-  Logger.root.onRecord.listen(new PrintHandler().call);
-  Logger.root.level = Level.FINEST;
+//  Logger.root.onRecord.listen(new PrintHandler().call);
+//  Logger.root.level = Level.FINEST;
   
   // Drag and Drop
   sectionDraggableAndDropzone();
@@ -33,16 +33,16 @@ main() {
 }
 
 installCodeblockTabs() {
-  codeblockDraggableAndDropzone(query('#draggable-dropzone'));
-  codeblockDraggingDivs(query('#dragging-divs'));
-  codeblockDropEffects(query('#drop-effects'));
-  codeblockDragImages(query('#drag-images'));
-  codeblockNestedElements(query('#nested-elements'));
-  codeblockSortableList(query('#sortable-list'));
-  codeblockSortableGrid(query('#sortable-grid'));
-  codeblockSortableListExclude(query('#sortable-list-exclude'));
-  codeblockSortableListHandles(query('#sortable-list-handles'));
-  codeblockSortableTwoGroups(query('#sortable-two-groups'));
+//  codeblockDraggableAndDropzone(query('#draggable-dropzone'));
+//  codeblockDraggingDivs(query('#dragging-divs'));
+//  codeblockDropEffects(query('#drop-effects'));
+//  codeblockDragImages(query('#drag-images'));
+//  codeblockNestedElements(query('#nested-elements'));
+//  codeblockSortableList(query('#sortable-list'));
+//  codeblockSortableGrid(query('#sortable-grid'));
+//  codeblockSortableListExclude(query('#sortable-list-exclude'));
+//  codeblockSortableListHandles(query('#sortable-list-handles'));
+//  codeblockSortableTwoGroups(query('#sortable-two-groups'));
   
   List<AnchorElement> tabLinks = queryAll('.example-code .menu li a');
   for (AnchorElement link in tabLinks) {
@@ -138,7 +138,7 @@ sectionDragImages() {
   ..install(query('#drag-images .two'));
   
   DraggableGroup dragGroupThree = new DraggableGroup(
-  dragImageFunction: (Element draggable) => new DragImage(canvasImage, 20, 20))
+      dragImageFunction: (Element draggable) => new DragImage(canvasImage, 20, 20))
   ..install(query('#drag-images .three'));
   
   // Install dropzone.

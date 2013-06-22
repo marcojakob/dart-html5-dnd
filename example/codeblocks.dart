@@ -117,10 +117,10 @@ codeblockDropEffects(Element section) {
       // HTML
       '''
 <div class="trash"></div>
-<a href="#" class="move">move</a>
-<a href="#" class="copy">copy</a>
-<a href="#" class="link">link</a>
-<a href="#" class="none">none</a>
+<div class="dragme move">move</div>
+<div class="dragme copy">copy</div>
+<div class="dragme link">link</div>
+<div class="dragme none">none</div>
       ''', 
       // CSS
       '''
@@ -134,7 +134,7 @@ codeblockDropEffects(Element section) {
   background: url(icons/trash.png) top right no-repeat;
 }
 
-#drop-effects a {
+#drop-effects .dragme {
   background: url(icons/document.png) no-repeat;
   /* ... */
 }
@@ -216,23 +216,17 @@ var dataUrl = canvas.toDataUrl("image/jpeg", 0.95);
 ImageElement canvasImage = new ImageElement(src: dataUrl);
 
 // Install draggables.
-DraggableGroup dragGroupOne = new DraggableGroup()
-..install(query('#drag-images .one'))
-..dragImageFunction = (Element draggable) {
-  return new DragImage(png, 40, 40);
-};
+DraggableGroup dragGroupOne = new DraggableGroup(
+    dragImageFunction: (Element draggable) => new DragImage(png, 40, 40))
+..install(query('#drag-images .one'));
 
-DraggableGroup dragGroupTwo = new DraggableGroup()
-..install(query('#drag-images .two'))
-..dragImageFunction = (Element draggable) {
-  return new DragImage(png, -20, -20);
-};
+DraggableGroup dragGroupTwo = new DraggableGroup(
+    dragImageFunction: (Element draggable) => new DragImage(png, -20, -20))
+..install(query('#drag-images .two'));
 
-DraggableGroup dragGroupThree = new DraggableGroup()
-..install(query('#drag-images .three'))
-..dragImageFunction = (Element draggable) {
-  return new DragImage(canvasImage, 0, 0);
-};
+DraggableGroup dragGroupThree = new DraggableGroup(
+    dragImageFunction: (Element draggable) => new DragImage(canvasImage, 20, 20))
+..install(query('#drag-images .three'));
 
 // Install dropzone.
 DropzoneGroup dropGroup = new DropzoneGroup()
@@ -495,7 +489,7 @@ codeblockSortableTwoGroups(Element section) {
       // Dart
       '''
 ImageElement png = new ImageElement(src: 'icons/smiley-happy.png');
-
+  
 SortableGroup sortGroup1 = new SortableGroup()
 ..installAll(queryAll('#sortable-two-groups .group1 li'))
 ..onSortUpdate.listen((SortableEvent event) {
@@ -503,11 +497,9 @@ SortableGroup sortGroup1 = new SortableGroup()
   event.newGroup.install(event.draggable);
 });
 
-SortableGroup sortGroup2 = new SortableGroup()
+SortableGroup sortGroup2 = new SortableGroup(
+    dragImageFunction: (Element draggable) => new DragImage(png, 5, 5))
 ..installAll(queryAll('#sortable-two-groups .group2 li'))
-..dragImageFunction = (Element draggable) {
-  return new DragImage(png, 0, 0);
-}
 ..onSortUpdate.listen((SortableEvent event) {
   event.originalGroup.uninstall(event.draggable);
   event.newGroup.install(event.draggable);
