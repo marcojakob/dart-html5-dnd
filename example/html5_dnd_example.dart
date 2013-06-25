@@ -8,8 +8,6 @@ import 'package:logging/logging.dart';
 import 'package:html5_dnd/html5_dnd.dart';
 import 'package:html5_dnd/html5_sortable.dart';
 
-//part 'codeblocks.dart';
-
 main() {
   // Uncomment to enable logging.
 //  Logger.root.onRecord.listen(new PrintHandler().call);
@@ -28,40 +26,6 @@ main() {
   sectionSortableListExclude();
   sectionSortableListHandles();
   sectionSortableTwoGroups();
-  
-  installCodeblockTabs();
-}
-
-installCodeblockTabs() {
-//  codeblockDraggableAndDropzone(query('#draggable-dropzone'));
-//  codeblockDraggingDivs(query('#dragging-divs'));
-//  codeblockDropEffects(query('#drop-effects'));
-//  codeblockDragImages(query('#drag-images'));
-//  codeblockNestedElements(query('#nested-elements'));
-//  codeblockSortableList(query('#sortable-list'));
-//  codeblockSortableGrid(query('#sortable-grid'));
-//  codeblockSortableListExclude(query('#sortable-list-exclude'));
-//  codeblockSortableListHandles(query('#sortable-list-handles'));
-//  codeblockSortableTwoGroups(query('#sortable-two-groups'));
-  
-  List<AnchorElement> tabLinks = queryAll('.example-code .menu li a');
-  for (AnchorElement link in tabLinks) {
-    link.onClick.listen((MouseEvent event) {
-      event.preventDefault();
-      
-      Element exampleCodeParent = link.parent.parent.parent;
-      
-      // Remove active class on all menu and content tabs.
-      exampleCodeParent.queryAll('[tab]').forEach((Element e) {
-        e.classes.remove('active');
-      });
-
-      // Add active class.
-      String currentTab = link.attributes['tab'];
-      link.classes.add('active');
-      exampleCodeParent.query('.content [tab="$currentTab"]').classes.add('active');
-    });  
-  }
 }
 
 sectionDraggableAndDropzone() {
