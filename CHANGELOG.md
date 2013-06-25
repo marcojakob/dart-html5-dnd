@@ -19,3 +19,19 @@ Changelog
 * Fix Issue #1: overClass (.dnd-over) stays after drag ended
 * Fix Issue #4: Support any HTML Element as drag image
 * Fix Issue #5: Always use Drag Image Polyfill for IE9 drags
+
+## Version 0.3.0 (2013-06-25) ##
+* Completely emulating drag and drop in IE9 and partly in IE10 (when custom drag
+  images are used): 
+  	* The workaround with calling dragDrop() on IE did not work 
+  	  reliably and was slow. Also, we could not have the drag image under the 
+  	  mouse cursor as events would not be forwarded to element underneath.
+    * No javascript file is needed any more and the dependency on js-interop
+      has been removed.
+    * Emulation works by listening to mouseDown, mouseUp and mouseMove events 
+      and translating them to the HTML5 dragStart, drag, dragEnd, dragEnter,
+      dragOver, dragLeave and drop events.
+* More stable handling of nested elements. Instead of keeping track of
+  dragOverElements in a list, the related target of the event is used to
+  determine if it is an event that happened on the main element or bubbled
+  up from child elements.
