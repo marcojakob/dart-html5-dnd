@@ -1,4 +1,21 @@
-part of html5_sortable;
+/**
+ * Helper library for reordering of HTML elements with native HTML5 Drag and
+ * Drop.
+ */
+library html5_dnd.sortable;
+
+import 'dart:html';
+import 'dart:async';
+import 'package:meta/meta.dart';
+import 'package:logging/logging.dart';
+
+import '../../html5_dnd.dart';
+import '../css_utils.dart' as css;
+import '../html5_utils.dart' as html5;
+
+final _logger = new Logger("html5_dnd.sortable");
+
+_Placeholder _currentPlaceholder;
 
 /**
  * Manages a group of sortables and their options and event listeners.

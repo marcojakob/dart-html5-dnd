@@ -81,14 +81,19 @@ class DropzoneGroup extends Group {
       subs.addAll(_installDropzone(element, this));
     }
     
-    // Install as emulated dropzone for IE9 and IE10.
-    if (!html5.supportsSetDragImage) {
+    // Install as emulated dropzone for IE9, IE10 and if touch is used.
+    if (!html5.supportsSetDragImage || _useTouchEvents()) {
       subs.addAll(_installEmulatedDropzone(element, this));
     }
     
     installedElements[element].addAll(subs);
   }
   
+  /**
+   * Common method to handle dragEnter events.
+   * 
+   * Adds CSS class and fires the dragEnter event.
+   */
   void _handleDragEnter(Element element, Point mousePagePosition, 
                         Point mouseClientPosition, EventTarget target) {
     _logger.finest('handleDragEnter');
@@ -113,6 +118,12 @@ class DropzoneGroup extends Group {
     }
   }
   
+  
+  /**
+   * Common method to handle dragOver events.
+   * 
+   * Fires dragOver event.
+   */
   void _handleDragOver(Element element, Point mousePagePosition, Point mouseClientPosition) {
     if (_onDragOver != null) {
       _onDragOver.add(new DropzoneEvent(currentDraggable, element, 
@@ -120,6 +131,11 @@ class DropzoneGroup extends Group {
     }
   }
   
+  /**
+   * Common method to handle dragLeave events.
+   * 
+   * Removes CSS class and fires the dragLeave event.
+   */
   void _handleDragLeave(Element element, Point mousePagePosition, 
                         Point mouseClientPosition, EventTarget target,
                         EventTarget relatedTarget) {
@@ -135,6 +151,11 @@ class DropzoneGroup extends Group {
     }
   }
   
+  /**
+   * Common method to handle drop events.
+   * 
+   * Fires the drop event.
+   */
   void _handleDrop(Element element, Point mousePagePosition, Point mouseClientPosition) {
     _logger.finest('handleDrop');
     

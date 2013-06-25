@@ -6,7 +6,8 @@ const String EMULATED_DRAG_ENTER = 'emulatedDragEnter';
 /// Event emulating dragOver. This is a bit different from the HTML5 dragOver 
 /// event which is fired even when the mouse is not moved. 
 /// RelatedTarget is the actual element under the mouse, which might either be
-/// the drag image or the same element as target.
+/// the drag image or the same element as target. This is used to style the 
+/// cursor. If no relatedTarget is supplied, the cursor is not changed.
 const String EMULATED_DRAG_OVER = 'emulatedDragOver';
 
 /// Event emulating dragLeave. RelatedTarget is the element the mouse exited to.
@@ -16,14 +17,21 @@ const String EMULATED_DRAG_LEAVE = 'emulatedDragLeave';
 const String EMULATED_DROP = 'emulatedDrop';
 
 
-// Subscriptions that need to be canceled on drag end.
-StreamSubscription _subMouseMove;
-
-bool _emulDragStarted = false;
+/// Subscriptions that need to be canceled on drag end.
+List<StreamSubscription> _emulSubs = new List<StreamSubscription>();
+/// Flag to prevent multiple widgets to handle the event.
+bool _emulDragHandled = false;
+/// Flag to determine if there was enough movement for it to be a drag.
+bool _emulDragMoved = false;
+/// The manually created drag image.
 DragImage _emulDragImage;
+/// Keeps track of the previous mouse target to fire dragLeave events on it.
 EventTarget _emulPrevMouseTarget;
-Element _emulPrevCursorElement;
-String _emulPrevCursorElementCursor;
+
+/// The element where the cursor might have been changed.
+Element _emulCursorElement;
+/// Saves the original cursor to be able to restore it.
+String _emulCursorElementCursor;
 
 /**
  * Installs emulated draggable behaviour for browsers that do not (completely) 
@@ -37,10 +45,8 @@ String _emulPrevCursorElementCursor;
  * and mouseup functions were defined on the dragged element, the user would 
  * now lose control because the mouse is not over the element any more.
  */
-// http://www.quirksmode.org/js/dragdrop.html
-// http://aktuell.de.selfhtml.org/artikel/javascript/draganddrop/
 List<StreamSubscription> _installEmulatedDraggable(Element element, DraggableGroup group) {
-  
+  // Subscriptions to uninstall element.
   List<StreamSubscription> subs = new List<StreamSubscription>();
   
   Element elementHandle = element;
@@ -52,164 +58,188 @@ List<StreamSubscription> _installEmulatedDraggable(Element element, DraggableGro
   // Listen for mouseDown.
   subs.add(elementHandle.onMouseDown.listen((MouseEvent downEvent) {
     // Don't let more than one widget handle mouseStart and only handle left button.
-    if (_subMouseMove != null || downEvent.button != 0) return; 
+    if (_emulDragHandled || downEvent.button != 0) return; 
+    
+    // Set the flag to prevent other widgets from inheriting the event
+    _emulDragHandled = true;
     
     downEvent.preventDefault();
     MouseEvent mouseDownEvent = downEvent;
     
     // Subscribe to mouseMove on entire document.
-    _subMouseMove = document.onMouseMove.listen((MouseEvent moveEvent) {
-      if (!_emulDragStarted 
+    _emulSubs.add(document.onMouseMove.listen((MouseEvent moveEvent) {
+      if (!_emulDragMoved 
           && _dragStartMouseDistanceMet(mouseDownEvent.page, moveEvent.page)) {
+        _emulDragMoved = true;
+        
         // -------------------
         // Emulate DragStart
         // -------------------
-        _emulateDragStart(element, group, mouseDownEvent);
+        _logger.finest('emulating dragStart');
+        _emulateDragStart(element, group, mouseDownEvent.page, mouseDownEvent.client);
       }
       
-      if (_emulDragStarted) {
+      if (_emulDragMoved) {
         // -------------------
         // Emulate Drag  (is a bit different from the HTML5 drag event which 
         //                is fired even when the mouse is not moved)
         // -------------------
-        _emulateDrag(element, group, moveEvent);
-        
-        // -------------------
-        // Fire Dropzone events (DragEnter, DragOver, DragLeave)
-        // -------------------
-        _fireEventsForDropzone(element, moveEvent);
+        _emulateDrag(element, group, moveEvent.target, moveEvent.page, 
+            moveEvent.client);
       }
-    });
+    }));
+    
     
     // -------------------
     // Emulate DragEnd
     // -------------------
-    _emulateDragEnd(element, group);
+    // Drag ends with mouse up.
+    _emulSubs.add(document.onMouseUp.listen((MouseEvent upEvent) {
+      _logger.finest('emulating dragEnd');
+      
+      // Fire dragEnd and indicate that it was dropped.
+      _emulateDragEnd(element, group, upEvent.target, upEvent.page, upEvent.client, 
+          dropped: true);
+    }));
+    
+    // Drag ends when escape key is hit.
+    _emulSubs.add(window.onKeyDown.listen((KeyboardEvent keyboardEvent) {
+      if (keyboardEvent.keyCode == KeyCode.ESC) { 
+        _emulateDragEnd(element, group, keyboardEvent.target, const Point(0, 0), 
+            const Point(0, 0));
+      }
+    }));
+    
+    // Drag ends when focus is lost.
+    _emulSubs.add(window.onBlur.listen((Event event) {
+      _emulateDragEnd(element, group, event.target, const Point(0, 0), 
+          const Point(0, 0));
+    }));
     
   })); // MouseDown.
   
   return subs;
 }
 
-void _emulateDragStart(Element element, DraggableGroup group, MouseEvent mouseDownEvent) {
-  _logger.finest('emulated dragStart');
-  
-  _emulDragStarted = true;
+/**
+ * Emulates a drag start by manually creating a drag image.
+ */
+void _emulateDragStart(Element element, DraggableGroup group, 
+                       Point mousePagePosition, Point mouseClientPosition) {
   
   if (group.dragImageFunction != null) {
     _emulDragImage = group.dragImageFunction(element);
   } else {
     // No custom dragImage provided --> manually create it.
     _logger.finest('Manually creating drag image from current drag element.');
-    _emulDragImage = new DragImage._forDraggable(element, mouseDownEvent.page);
+    _emulDragImage = new DragImage._forDraggable(element, mousePagePosition);
   }
   // Add drag image.
   _emulDragImage._addEmulatedDragImage(element);
   
-  group._handleDragStart(element, mouseDownEvent.page, mouseDownEvent.client);
-}
-
-void _emulateDrag(Element element, DraggableGroup group, MouseEvent moveEvent) {
-  _emulDragImage._updateEmulatedDragImagePosition(moveEvent.page);
-  
-  group._handleDrag(element, moveEvent.page, moveEvent.client);
-}
-
-void _emulateDragEnd(Element element, DraggableGroup group) {
-  StreamSubscription subMouseUp;
-  StreamSubscription subEscKey;
-  StreamSubscription subFocusLost;
-  
-  Function dragEndFunc = (Event event) {
-    // Cancel drag end subscriptions.
-    subMouseUp.cancel();
-    subEscKey.cancel();
-    subFocusLost.cancel();
-    
-    // Cancel other subscriptions.
-    if (_subMouseMove!= null) {
-      _subMouseMove.cancel();
-      _subMouseMove = null;
-    }
-    
-    if (_emulDragStarted) {
-      _logger.finest('emulated dragEnd');
-      _emulDragImage._removeEumlatedDragImage();
-      
-      if (event is MouseEvent) {
-        group._handleDragEnd(element, event.page, event.client);
-      } else {
-        // We do not have a valid mouse position.
-        group._handleDragEnd(element, const Point(0, 0), const Point(0, 0));
-      }
-    }
-    
-    // Restore cursor.
-    _restoreCursor();
-    
-    // Reset variables.
-    _emulDragStarted = false;
-    _emulDragImage = null;
-    _emulPrevMouseTarget = null;
-  };
-  
-  subMouseUp = document.onMouseUp.listen((MouseEvent upEvent) {
-    // Fire the drop event.
-    EventTarget target = upEvent.target;
-    if (_emulDragImage != null && 
-        (_emulDragImage.element == target || _emulDragImage.element.contains(target))) {
-      // Forward event on the drag image to element underneath.
-      target = _getElementUnder(_emulDragImage.element, upEvent);
-    }
-    target.dispatchEvent(_createEmulatedMouseEvent(upEvent, EMULATED_DROP));    
-    
-    dragEndFunc(upEvent);
-  });
-  subEscKey = window.onKeyDown.listen((KeyboardEvent keyboardEvent) {
-    if (keyboardEvent.keyCode == KeyCode.ESC) { 
-      dragEndFunc(keyboardEvent);
-    }
-  });
-  subFocusLost = window.onBlur.listen((Event event) {
-    dragEndFunc(event);
-  });
+  group._handleDragStart(element, mousePagePosition, mouseClientPosition);
 }
 
 /**
- * Emulates the dropzone events (DragEnter, DragOver, and DragLeave).
- * If an event occurs on the [dragImageElement] it is forwarded to the element
- * underneath.
+ * Emulates a drag by updating the drag image position.
  */
-void _fireEventsForDropzone(Element element, MouseEvent mouseEvent) {
-  EventTarget target = mouseEvent.target;
-  if (_emulDragImage.element == target || _emulDragImage.element.contains(target)) {
-    // Forward events on the drag image to element underneath.
-    target = _getElementUnder(_emulDragImage.element, mouseEvent);
+void _emulateDrag(Element element, DraggableGroup group, EventTarget target, 
+                  Point mousePagePosition, Point mouseClientPosition) {
+  _emulDragImage._updateEmulatedDragImagePosition(mousePagePosition);
+  
+  group._handleDrag(element, mousePagePosition, mouseClientPosition);
+  
+  // -------------------
+  // Fire Dropzone events (DragEnter, DragOver, DragLeave)
+  // -------------------
+  if (target != null) {
+    _dispatchDropzoneEvents(element, target, mousePagePosition, 
+        mouseClientPosition, changeCursor: true);
+  }
+}
+
+/**
+ * Emulates a drag end by removing the drag image.
+ * 
+ * If [dropped] is true, a drop event is fired before the dragEnd.
+ */
+void _emulateDragEnd(Element element, DraggableGroup group, EventTarget target,
+                  Point mousePagePosition, Point mouseClientPosition, 
+                  {bool dropped: false}) {
+
+  if (dropped) {
+    // Fire the drop event.
+    EventTarget realTarget = _getRealTarget(target, mouseClientPosition);
+    
+    realTarget.dispatchEvent(_createEmulatedMouseEvent(EMULATED_DROP, null, 
+        mousePagePosition, mouseClientPosition));  
   }
   
-  if (_emulPrevMouseTarget == target) {
+  // Cancel all subscriptions that were added when drag started.
+  _emulSubs.forEach((StreamSubscription s) => s.cancel());
+  _emulSubs.clear();
+  
+  if (_emulDragMoved) {
+    _emulDragImage._removeEumlatedDragImage();
+    
+    group._handleDragEnd(element, mousePagePosition, mouseClientPosition);
+  }
+  
+  // Restore cursor.
+  _restoreCursor();
+  
+  // Reset variables.
+  _emulDragHandled = false;
+  _emulDragMoved = false;
+  _emulDragImage = null;
+  _emulPrevMouseTarget = null;
+}
+
+/**
+ * Fires the dropzone events (DragEnter, DragOver, and DragLeave).
+ * If an event occurs on the [dragImageElement] it is forwarded to the element
+ * underneath.
+ * 
+ * If [changeCursor] is true, the appropriate cursor is set.
+ */
+void _dispatchDropzoneEvents(Element element, EventTarget mouseEventTarget, 
+                             Point mousePagePosition, Point mouseClientPosition, 
+                             {changeCursor: false}) {
+  
+  // Determine the actual target that should receive the event.
+  EventTarget realTarget = _getRealTarget(mouseEventTarget, mouseClientPosition);
+  
+  if (_emulPrevMouseTarget == realTarget) {
     // Mouse was moved on the same element --> fire dragOver.
-    _setNoDropCursor(mouseEvent.target);
-    target.dispatchEvent(
-        _createEmulatedMouseEvent(mouseEvent, EMULATED_DRAG_OVER, mouseEvent.target));
+    if (changeCursor) {
+      _setNoDropCursor(mouseEventTarget);
+    }
+    realTarget.dispatchEvent(
+        _createEmulatedMouseEvent(EMULATED_DRAG_OVER, mouseEventTarget, 
+                                  mousePagePosition, mouseClientPosition));
     
   } else {
     // Mouse entered a new element --> fire dragEnter.
-    target.dispatchEvent(
-        _createEmulatedMouseEvent(mouseEvent, EMULATED_DRAG_ENTER, _emulPrevMouseTarget));
+    realTarget.dispatchEvent(
+        _createEmulatedMouseEvent(EMULATED_DRAG_ENTER, _emulPrevMouseTarget, 
+                                  mousePagePosition, mouseClientPosition));
     
     if (_emulPrevMouseTarget != null) {
       // Mouse left the previous element --> fire dragLeave.
       _emulPrevMouseTarget.dispatchEvent(
-          _createEmulatedMouseEvent(mouseEvent, EMULATED_DRAG_LEAVE, target));
+          _createEmulatedMouseEvent(EMULATED_DRAG_LEAVE, realTarget, 
+                                    mousePagePosition, mouseClientPosition));
     }
     
     // Also fire the first dragOver event for the new element.
-    _setNoDropCursor(mouseEvent.target, force: true);
-    target.dispatchEvent(
-        _createEmulatedMouseEvent(mouseEvent, EMULATED_DRAG_OVER, mouseEvent.target));
+    if (changeCursor) {
+      _setNoDropCursor(mouseEventTarget, force: true);
+    }
+    realTarget.dispatchEvent(
+        _createEmulatedMouseEvent(EMULATED_DRAG_OVER, mouseEventTarget, 
+                                  mousePagePosition, mouseClientPosition));
     
-    _emulPrevMouseTarget = target;
+    _emulPrevMouseTarget = realTarget;
   }
 }
 
@@ -226,51 +256,59 @@ bool _dragStartMouseDistanceMet(Point mouseDownPagePosition, Point mousePagePosi
 /**
  * Sets the cursor on [target] to 'no-drop'. The original cursor on the 
  * previous element is restored.
- * If [target] is the same as [_emulPrevCursorElement], the cursor is only
+ * If [target] is the same as [_emulCursorElement], the cursor is only
  * set if [force] is true. 
  */
 void _setNoDropCursor(EventTarget target, {bool force: false}) {
-  if (!force && target == _emulPrevCursorElement) return;
+  if (!force && target == _emulCursorElement) return;
   
   _restoreCursor();
   
   if (target is Element) {
     // Set 'no-drop' as cursor.
-    _emulPrevCursorElementCursor = target.style.cursor;
+    _emulCursorElementCursor = target.style.cursor;
     target.style.cursor = 'no-drop';
-    _emulPrevCursorElement = target;
+    _emulCursorElement = target;
   }
 }
 
 /**
- * Removes 'no-drop' cursor on [_emulPrevCursorElement] and set it to its
+ * Removes 'no-drop' cursor on [_emulCursorElement] and set it to its
  * original value.
  */
 void _restoreCursor() {
-  if (_emulPrevCursorElement != null) {
-    if (_emulPrevCursorElementCursor != null) {
-      _emulPrevCursorElement.style.cursor = _emulPrevCursorElementCursor;
+  if (_emulCursorElement != null) {
+    if (_emulCursorElementCursor != null) {
+      _emulCursorElement.style.cursor = _emulCursorElementCursor;
     } else {
-      _emulPrevCursorElement.style.removeProperty('cursor');
+      _emulCursorElement.style.removeProperty('cursor');
     }
-    _emulPrevCursorElement = null;
-    _emulPrevCursorElementCursor = null;
+    _emulCursorElement = null;
+    _emulCursorElementCursor = null;
   }
 }
 
 /**
- * Returns the element where the mouse is currently over. If the mouse is over
- * [element], the element below [element] is returned.
+ * Returns the actual target where events should be fired on. If the mouse is
+ * over the drag image, the element below is returned, otherwise, the [target]
+ * itself is returend.
  */
-EventTarget _getElementUnder(Element element, MouseEvent event) {
-  element.style.visibility = 'hidden';
-  Element elementUnder = document.elementFromPoint(event.client.x, event.client.y);
-  element.style.visibility = 'visible';
-  return elementUnder;
+EventTarget _getRealTarget(EventTarget target, Point mouseClientPosition) {
+  EventTarget realTarget = target;
+  
+  if (_emulDragImage.element == target || _emulDragImage.element.contains(target)) {
+    // Forward events on the drag image to element underneath.
+    _emulDragImage.element.style.visibility = 'hidden';
+    realTarget = document.elementFromPoint(mouseClientPosition.x, 
+        mouseClientPosition.y);
+    _emulDragImage.element.style.visibility = 'visible';
+  }
+  
+  return realTarget;
 }
 
 /**
- * Creates a [CustomEvent] of type [type] with properties from [e].
+ * Creates a new [MouseEvent] of type [type].
  * 
  * **Important!** There is currently no way to set the event's pageX and pageY
  * property. Because we need this, we abuse screenX and screenY for the pageX
@@ -278,12 +316,14 @@ EventTarget _getElementUnder(Element element, MouseEvent event) {
  * TODO: Fix this once https://code.google.com/p/dart/issues/detail?id=11452
  * is fixed!!
  */
-MouseEvent _createEmulatedMouseEvent(MouseEvent e, String type, [EventTarget relatedTarget]) {
-  return new MouseEvent(type, 
-      view: e.view, detail: e.detail, screenX: e.page.x, 
-      screenY: e.page.y, clientX: e.client.x, clientY: e.client.y, 
-      button: e.button, canBubble: e.bubbles, cancelable: e.cancelable, 
-      ctrlKey: e.ctrlKey, altKey: e.altKey, shiftKey: e.shiftKey, 
-      metaKey: e.metaKey, 
-      relatedTarget: relatedTarget);
+MouseEvent _createEmulatedMouseEvent(String type, EventTarget relatedTarget, 
+                                     Point mousePagePosition, Point mouseClientPosition) {
+  return new MouseEvent(type, view: window, detail: 1, 
+      // !! Dangerous workaround start!!
+      screenX: mousePagePosition.x, screenY: mousePagePosition.y, 
+      // !! Dangerous workaround end!!
+      clientX: mouseClientPosition.x, clientY: mouseClientPosition.y, 
+      button: 0, canBubble: true, cancelable: true, 
+      ctrlKey: false, altKey: false, shiftKey: false, 
+      metaKey: false, relatedTarget: relatedTarget);
 }

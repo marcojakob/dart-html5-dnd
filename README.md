@@ -28,7 +28,7 @@ Add the folowing to your **pubspec.yaml** and run **pub install**
 ```
 
 ### 2. Import ###
-Import the `html5_dnd` library in your Dart code. If your using the Sortable 
+Import the `html5_dnd` library in your Dart code. If you're using the Sortable 
 functionality, also add `html5_sortable`.
 
 ```dart

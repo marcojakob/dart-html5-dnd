@@ -6,21 +6,23 @@ import 'dart:async';
 import 'package:logging_handlers/logging_handlers_shared.dart';
 import 'package:logging/logging.dart';
 import 'package:html5_dnd/html5_dnd.dart';
-import 'package:html5_dnd/html5_sortable.dart';
 
 main() {
   // Uncomment to enable logging.
 //  Logger.root.onRecord.listen(new PrintHandler().call);
 //  Logger.root.level = Level.FINEST;
   
-  // Drag and Drop
+  // Enable touch support.
+  enableTouchEvents = true;
+  
+  // Install Drag and Drop examples.
   sectionDraggableAndDropzone();
   sectionDraggingDivs();
   sectionDropEffects();
   sectionDragImages();
   sectionNestedElements();
   
-  // Sortable
+  // Install Sortable examples.
   sectionSortableList();
   sectionSortableGrid();
   sectionSortableListExclude();

@@ -1,5 +1,11 @@
 part of html5_dnd;
 
+/// Currently dragged element.
+Element currentDraggable;
+
+/// The [DraggableGroup] the [currentDraggable] belongs to.
+DraggableGroup currentDraggableGroup;
+
 /**
  * Manages a group of draggables and their options and event listeners.
  */
@@ -98,7 +104,7 @@ class DraggableGroup extends Group {
     return _onDragEnd.stream;
   }
   
-  bool _emulate = false;
+  bool _emulateDraggable = false;
   
   /**
    * Constructor to create a [DraggableGroup].
@@ -118,10 +124,10 @@ class DraggableGroup extends Group {
     if(!html5.supportsDraggable 
         || (dragImageFunction != null && !html5.supportsSetDragImage)) {
       _logger.finest('Browser does not (completely) support HTML5 draggable.');
-      _emulate = true;
+      _emulateDraggable = true;
     } else {
       _logger.finest('Browser does support HTML5 draggable.');
-      _emulate = false;
+      _emulateDraggable = false;
     }
   }
   
@@ -131,18 +137,28 @@ class DraggableGroup extends Group {
   void install(Element element) {
     super.install(element);
     
-    List<StreamSubscription> subs;
+    List<StreamSubscription> subs = new List<StreamSubscription>();
     
-    if (_emulate) {
-      subs = _installEmulatedDraggable(element, this);
+    if (_emulateDraggable) {
+      subs.addAll(_installEmulatedDraggable(element, this));
     } else {
-      subs = _installDraggable(element, this);
+      subs.addAll(_installDraggable(element, this));
+    }
+    
+    print('TouchEvent.supported ${TouchEvent.supported}');
+    
+    // Install touch events if enabled and supported.
+    if (_useTouchEvents()) {
+      _logger.finest('installing touch support');
+      subs.addAll(_installTouchEvents(element, this));
     }
     
     installedElements[element].addAll(subs);
   }
   
   /**
+   * Common method to handle dragStart events. 
+   * 
    * Adds the CSS classes and fires dragStart event.
    */
   void _handleDragStart(Element element, Point mousePagePosition, Point mouseClientPosition) {
@@ -169,6 +185,8 @@ class DraggableGroup extends Group {
   }
   
   /**
+   * Common method to handle drag events.
+   * 
    * Fires drag event.
    */
   void _handleDrag(Element element, Point mousePagePosition, Point mouseClientPosition) {
@@ -178,6 +196,8 @@ class DraggableGroup extends Group {
   }
   
   /**
+   * Common method to handle dragEnd events.
+   * 
    * Removes CSS classes and fires dragEnd event.
    */
   void _handleDragEnd(Element element, Point mousePagePosition, 
@@ -203,7 +223,7 @@ class DraggableGroup extends Group {
   }
 }
 
-  
+
 List<StreamSubscription> _installDraggable(Element element, DraggableGroup group) {
   List<StreamSubscription> subs = new List<StreamSubscription>();
   
