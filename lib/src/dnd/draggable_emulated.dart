@@ -77,7 +77,7 @@ List<StreamSubscription> _installEmulatedDraggable(Element element, DraggableGro
         // -------------------
         // Fire Dropzone events (DragEnter, DragOver, DragLeave)
         // -------------------
-        _fireEventsForDropzone(moveEvent);
+        _fireEventsForDropzone(element, moveEvent);
       }
     });
     
@@ -144,20 +144,22 @@ void _emulateDragEnd(Element element, DraggableGroup group) {
       }
     }
     
-    // Reset variables.
-    _emulDragImage = null;
-    _emulDragStarted = false;
-    
-    // Reset cursor.
+    // Restore cursor.
     _restoreCursor();
+    
+    // Reset variables.
+    _emulDragStarted = false;
+    _emulDragImage = null;
+    _emulPrevMouseTarget = null;
   };
   
   subMouseUp = document.onMouseUp.listen((MouseEvent upEvent) {
     // Fire the drop event.
     EventTarget target = upEvent.target;
-    if (_emulDragImage != null && target == _emulDragImage.element) {
+    if (_emulDragImage != null && 
+        (_emulDragImage.element == target || _emulDragImage.element.contains(target))) {
       // Forward event on the drag image to element underneath.
-      target = _getElementUnder(upEvent);
+      target = _getElementUnder(_emulDragImage.element, upEvent);
     }
     target.dispatchEvent(_createEmulatedMouseEvent(upEvent, EMULATED_DROP));    
     
@@ -178,11 +180,11 @@ void _emulateDragEnd(Element element, DraggableGroup group) {
  * If an event occurs on the [dragImageElement] it is forwarded to the element
  * underneath.
  */
-void _fireEventsForDropzone(MouseEvent mouseEvent) {
+void _fireEventsForDropzone(Element element, MouseEvent mouseEvent) {
   EventTarget target = mouseEvent.target;
-  if (target == _emulDragImage.element) {
+  if (_emulDragImage.element == target || _emulDragImage.element.contains(target)) {
     // Forward events on the drag image to element underneath.
-    target = _getElementUnder(mouseEvent);
+    target = _getElementUnder(_emulDragImage.element, mouseEvent);
   }
   
   if (_emulPrevMouseTarget == target) {
@@ -257,21 +259,14 @@ void _restoreCursor() {
 }
 
 /**
- * Returns the element that is one layer under the element where the mouse
- * is currently over. 
+ * Returns the element where the mouse is currently over. If the mouse is over
+ * [element], the element below [element] is returned.
  */
-EventTarget _getElementUnder(MouseEvent event) {
-  var target = event.target;
-  if (target is Element) {
-    target.style.visibility = 'hidden';
-    Element elementUnder = document.elementFromPoint(event.client.x, event.client.y);
-    target.style.visibility = 'visible';
-    if (elementUnder != null) {
-      return elementUnder;
-    }
-  }
-  // Could not get element under --> return original target.
-  return target;
+EventTarget _getElementUnder(Element element, MouseEvent event) {
+  element.style.visibility = 'hidden';
+  Element elementUnder = document.elementFromPoint(event.client.x, event.client.y);
+  element.style.visibility = 'visible';
+  return elementUnder;
 }
 
 /**

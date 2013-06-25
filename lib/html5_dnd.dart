@@ -28,13 +28,6 @@ Element currentDraggable;
 /// The [DraggableGroup] the [currentDraggable] belongs to.
 DraggableGroup currentDraggableGroup;
 
-/// Keep track of [EventTarget]s where dragEnter or dragLeave has been fired on.
-/// This is necessary as a dragEnter or dragLeave event is not only fired
-/// on the [dropzoneElement] but also on its children. Now, whenever the 
-/// [dragOverElements] is empty we know the dragEnter or dragLeave event
-/// was fired on the real [dropzoneElement] and not on its children.
-Set<EventTarget> currentDragOverElements = new Set<EventTarget>();
-
 /**
  * Abstract superclass for all groups containing drag and drop elements.
  */

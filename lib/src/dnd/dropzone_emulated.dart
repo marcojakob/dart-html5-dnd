@@ -21,16 +21,13 @@ List<StreamSubscription> _installEmulatedDropzone(Element element, DropzoneGroup
     
     _logger.finest('emulated dragEnter');
     
-    if (!element.contains(mouseEvent.relatedTarget)) {
-      // Mouse was moved from outside and might have skipped some elements. 
-      // Must clear the drag over elements.
-      _logger.finest('relatedTarget is not a child of element having the listener, clearing dragOverElements.');
-      currentDragOverElements.clear();
+    // Only continue if the event is a real event generated for the main 
+    // element and not bubbled up by any of its children. 
+    if (_isMainEvent(element, mouseEvent.relatedTarget)) {
+      // screenX and screenY were abused as pageX and pageY! TODO: Wait for #11452 to be fixed.
+      Point mousePagePosition = mouseEvent.screen;
+      group._handleDragEnter(element, mousePagePosition, mouseEvent.client, mouseEvent.target);
     }
-    
-    // screenX and screenY were abused as pageX and pageY! TODO: Wait for #11452 to be fixed.
-    Point mousePagePosition = mouseEvent.screen;
-    group._handleDragEnter(element, mousePagePosition, mouseEvent.client, mouseEvent.target);
   }));
   
   // -------------------
@@ -72,10 +69,14 @@ List<StreamSubscription> _installEmulatedDropzone(Element element, DropzoneGroup
     
     _logger.finest('emulated dragLeave');
     
-    // screenX and screenY were abused as pageX and pageY! TODO: Wait for #11452 to be fixed.
-    Point mousePagePosition = mouseEvent.screen;
-    group._handleDragLeave(element, mousePagePosition, mouseEvent.client,
-        mouseEvent.target, mouseEvent.relatedTarget);
+    // Only continue if the event is a real event generated for the main 
+    // element and not bubbled up by any of its children. 
+    if (_isMainEvent(element, mouseEvent.relatedTarget)) {
+      // screenX and screenY were abused as pageX and pageY! TODO: Wait for #11452 to be fixed.
+      Point mousePagePosition = mouseEvent.screen;
+      group._handleDragLeave(element, mousePagePosition, mouseEvent.client,
+          mouseEvent.target, mouseEvent.relatedTarget);
+    }
   }));
   
   // -------------------

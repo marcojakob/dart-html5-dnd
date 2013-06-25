@@ -146,6 +146,8 @@ class DraggableGroup extends Group {
    * Adds the CSS classes and fires dragStart event.
    */
   void _handleDragStart(Element element, Point mousePagePosition, Point mouseClientPosition) {
+    _logger.finest('handleDragStart');
+    
     currentDraggable = element;
     currentDraggableGroup = this;
     
@@ -180,6 +182,8 @@ class DraggableGroup extends Group {
    */
   void _handleDragEnd(Element element, Point mousePagePosition, 
                       Point mouseClientPosition) {
+    _logger.finest('handleDragEnd');
+    
     // Remove CSS classes.
     if (draggingClass != null) {
       element.classes.remove(draggingClass);
@@ -196,7 +200,6 @@ class DraggableGroup extends Group {
     // Reset variables.
     currentDraggable = null;
     currentDraggableGroup = null;
-    currentDragOverElements.clear();
   }
 }
 
@@ -233,6 +236,7 @@ List<StreamSubscription> _installDraggable(Element element, DraggableGroup group
       return;
     }
     _logger.finest('dragStart');
+    
     // In Firefox it is possible to start selection outside of a draggable,
     // then drag entire selection. This leads to strange behavior, so we 
     // deactivate selection here.
@@ -275,12 +279,14 @@ List<StreamSubscription> _installDraggable(Element element, DraggableGroup group
   subs.add(element.onDragEnd.listen((MouseEvent mouseEvent) {
     // Do nothing if no element of this dnd is dragged.
     if (currentDraggable == null) return;
+    
     _logger.finest('dragEnd');
 
     group._handleDragEnd(element, mouseEvent.page, mouseEvent.client);
     
     // Reset variables.
     isHandle = false;
+    _lastDragEnterTarget = null;
   }));
   
   return subs;
