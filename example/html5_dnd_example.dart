@@ -12,9 +12,6 @@ main() {
 //  Logger.root.onRecord.listen(new PrintHandler().call);
 //  Logger.root.level = Level.FINEST;
   
-  // Enable touch support.
-  enableTouchEvents = true;
-  
   // Install Drag and Drop examples.
   sectionDraggableAndDropzone();
   sectionDraggingDivs();
@@ -28,8 +25,12 @@ main() {
   sectionSortableListExclude();
   sectionSortableListHandles();
   sectionSortableTwoGroups();
+
+  // Used for the code examples on the blog website.
+//  _installCodeblockTabs();
 }
 
+  
 sectionDraggableAndDropzone() {
   // Install draggables (documents).
   DraggableGroup dragGroup = new DraggableGroup()
@@ -203,4 +204,26 @@ sectionSortableTwoGroups() {
   // Only accept elements from this section.
   sortGroup1.accept.addAll([sortGroup1, sortGroup2]);
   sortGroup2.accept.addAll([sortGroup1, sortGroup2]);
+}
+
+
+_installCodeblockTabs() {
+  List<AnchorElement> tabLinks = queryAll('.example-code .menu li a');
+  for (AnchorElement link in tabLinks) {
+    link.onClick.listen((MouseEvent event) {
+      event.preventDefault();
+      
+      Element exampleCodeParent = link.parent.parent.parent;
+      
+      // Remove active class on all menu and content tabs.
+      exampleCodeParent.queryAll('[tab]').forEach((Element e) {
+        e.classes.remove('active');
+      });
+
+      // Add active class.
+      String currentTab = link.attributes['tab'];
+      link.classes.add('active');
+      exampleCodeParent.query('.content [tab="$currentTab"]').classes.add('active');
+    });  
+  }
 }

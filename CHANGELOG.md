@@ -35,3 +35,11 @@ Changelog
   dragOverElements in a list, the related target of the event is used to
   determine if it is an event that happened on the main element or bubbled
   up from child elements.
+  
+## Version 0.3.1 (2013-06-26) ##
+* Touch Event support (Issue #3): Uses touchStart, touchMove, and touchEnd 
+  events to emulate HTML5 drag and drop behaviour.
+* Reorganized some parts. Now only html5_dnd.dart needs to be imported and 
+  sortable is imported automatically. If some functionality like sortable isn't 
+  used, Dart's treeshaking will make sure no unnecessary code is added.
+* Add extended usage documentation to readme.
