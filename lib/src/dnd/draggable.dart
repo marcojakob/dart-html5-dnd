@@ -140,12 +140,12 @@ class DraggableGroup extends Group {
     List<StreamSubscription> subs = new List<StreamSubscription>();
     
     if (_emulateDraggable) {
+      _logger.finest('installing as emulated draggable');
       subs.addAll(_installEmulatedDraggable(element, this));
     } else {
+      _logger.finest('installing as draggable');
       subs.addAll(_installDraggable(element, this));
     }
-    
-    print('TouchEvent.supported ${TouchEvent.supported}');
     
     // Install touch events if enabled and supported.
     if (_useTouchEvents()) {

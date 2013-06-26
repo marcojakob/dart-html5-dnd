@@ -78,11 +78,13 @@ class DropzoneGroup extends Group {
     
     // Install as HTML5 dropzone for all browsers except IE9.
     if (html5.supportsDraggable) {
+      _logger.finest('installing as dropzone');
       subs.addAll(_installDropzone(element, this));
     }
     
     // Install as emulated dropzone for IE9, IE10 and if touch is used.
     if (!html5.supportsSetDragImage || _useTouchEvents()) {
+      _logger.finest('installing as emulated dropzone');
       subs.addAll(_installEmulatedDropzone(element, this));
     }
     
