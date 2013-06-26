@@ -4,7 +4,6 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/> 
-  <base target="_parent" /> <!-- to open links when used in iFrame -->
   
   <title>Dart HTML5 Drag and Drop</title>
   
@@ -17,27 +16,28 @@
   <article>
     <div id="intro">
       <p>
-        Native HTML5 Drag and Drop is <a href="http://www.quirksmode.org/blog/archives/2009/09/the_html5_drag.html">
-        not easy to work with</a>! The 
-        <a href="https://github.com/marcojakob/dart-html5-dnd">Dart HTML5 Drag 
-        and Drop</a> library was created to use HTML5 Drag and Drop in a 
-        consistend way across all modern browsers. Here are some examples of 
-        how to use it.
+        Native HTML5 Drag and Drop is <a href="http://www.quirksmode.org/blog/archives/2009/09/the_html5_drag.html">not easy to work with</a>! The 
+        <a href="https://github.com/marcojakob/dart-html5-dnd">Dart HTML5 Drag and Drop</a> library was created to use HTML5 Drag and Drop in a consistend way across all modern browsers. Here are some examples of how to use it.
       </p>
+        
+      <h3>Features</h3>
       <p>
-        API and Examples are inspired by 
         <ul>
-          <li>
-            <a href="http://farhadi.ir/projects/html5sortable/">HTML5 Sortable</a> (thank you, Ali Farhadi!)
-          </li>
-          <li>
-            jQuery UI: <a href="http://api.jqueryui.com/draggable/">Draggable</a>, 
-            <a href="http://api.jqueryui.com/droppable/">Droppable</a> and 
-            <a href="http://api.jqueryui.com/sortable/">Sortable</a>
-          </li>
+          <li>Make any HTML Element <code>draggable</code>.</li>
+          <li>Create <code>dropzones</code> and connect them with <code>draggables</code>.</li>
+          <li>Rearrange elements with <code>sortables</code> (similar to jQuery UI Sortable).</li>
+          <li>Support for <code>touch events</code> on touch screen devices.</li>
+          <li>Same functionality and API for IE9+, Firefox, Chrome and Safari.</li>
+          <li>Uses fast native HTML5 Drag and Drop of the browser whenever possible.</li>
+          <li>For browsers that do not support some features, the behaviour is emulated.
+              This is the case for IE9 and partly for IE10 (when custom drag images are used).</li>
         </ul>
       </p>
+      
       <p>
+        API and Examples are inspired by <a href="http://farhadi.ir/projects/html5sortable/">HTML5 Sortable</a>, jQuery UI (<a href="http://api.jqueryui.com/draggable/">Draggable</a>, 
+          <a href="http://api.jqueryui.com/droppable/">Droppable</a>, <a href="http://api.jqueryui.com/sortable/">Sortable</a>) and <a href="http://touchpunch.furf.com/">Touch Punch</a>.
+      </p>
         For <strong>installation instructions, download and source code</strong> 
         see 
         <ul>
