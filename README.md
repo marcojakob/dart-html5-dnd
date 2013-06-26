@@ -6,7 +6,7 @@ Helper library to simplify **HTML5 Drag and Drop** in Dart.
 ## Features ##
 * Make any HTML Element `draggable`.
 * Create `dropzones` and connect them with `draggables`.
-* Rearrange elements with `sortable` (similar to jQuery UI Sortable).
+* Rearrange elements with `sortables` (similar to jQuery UI Sortable).
 * Support for `touch events` on touch screen devices.
 * Same functionality and API for IE9+, Firefox, Chrome and Safari.
 * Uses fast native HTML5 Drag and Drop of the browser whenever possible.
@@ -17,6 +17,8 @@ Helper library to simplify **HTML5 Drag and Drop** in Dart.
 ## Demo ##
 See [HTML5 Drag and Drop in action](http://edu.makery.ch/projects/dart-html5-drag-and-drop)
 (with code examples).
+
+[![Drag and Drop Example](https://raw.github.com/marcojakob/html5_dnd/master/doc/dnd-example.png)](http://edu.makery.ch/projects/dart-html5-drag-and-drop)
 
 All examples are also available in the `example` directory on GitHub.
 
@@ -43,6 +45,7 @@ See the demo page above or the `example` directory to see some live examples
 with code.
 
 In general, to make drag and drop work, we will have to do two things:
+
 1. Create draggables by installing HTML elements in a `DraggableGroup`.
 2. Create dropzones by installing HTML elements in a `DropzoneGroup`.
 
@@ -185,7 +188,7 @@ listen to all their events.
 
 #### Sortable Options ####
 In addition to the inherited `DraggableGroup` and `DropzoneGroup` options, 
-`SortableGroup` as the following options:
+`SortableGroup` has the following options:
 
 ```dart
 SortableGroup sortGroup = new SortableGroup();
@@ -202,7 +205,8 @@ sortGroup.isGrid = false;
 ```
 
 #### Sortable Events ####
-There is one additional event for `SortableGroup`s:
+Next to the inherited `DraggableGroup` and `DropzoneGroup` events 
+`SortableGroup` has one additional event:
 
 ```dart 
 SortableGroup sortGroup = new SortableGroup();
@@ -213,7 +217,7 @@ sortGroup.onSortUpdate.listen((SortableEvent event) => print('elements were sort
 
 ## Thanks and Contributions ##
 I'd like to thank the people who kindly helped me with their answers or put 
-some tutorial or code examples online. They've already contributed to this 
+some tutorial or code examples online. They've indirectly contributed to this 
 project.
 
 If you'd like to contribute, you're welcome to report issues or 
