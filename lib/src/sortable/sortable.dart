@@ -24,7 +24,7 @@ _Placeholder _currentPlaceholder;
  * Sortable elements can be dragged to either other sortables or to dropzones. 
  * A sortable can accept other draggable elements that are not sortables.
  */
-class SortableGroup extends DraggableGroup {
+class SortableGroup extends DraggableGroup implements DropzoneGroup {
   // -------------------
   // Sortable Options
   // -------------------

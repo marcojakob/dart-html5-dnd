@@ -33,9 +33,9 @@ final _logger = new Logger("html5_dnd");
  * If this property is set to true, touch events are enabled on devices that 
  * support it. 
  * 
- * Default is false.
+ * Default is true.
  */
-bool enableTouchEvents = false;
+bool enableTouchEvents = true;
 
 /** 
  * Return true if touch events are enabled and the current device supports it.

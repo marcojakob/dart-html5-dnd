@@ -42,13 +42,13 @@ List<StreamSubscription> _installEmulatedDropzone(Element element, DropzoneGroup
       
       // Set a new cursor (old cursor will be restored by EmulatedDraggableGroup)
       switch(currentDraggableGroup.dropEffect) {
-        case DraggableGroup.DROP_EFFECT_MOVE:
+        case DROP_EFFECT_MOVE:
           elementUnderMouse.style.cursor = 'move';
           break;
-        case DraggableGroup.DROP_EFFECT_COPY:
+        case DROP_EFFECT_COPY:
           elementUnderMouse.style.cursor = 'copy';
           break;
-        case DraggableGroup.DROP_EFFECT_LINK:
+        case DROP_EFFECT_LINK:
           elementUnderMouse.style.cursor = 'alias';
           break;
         default:

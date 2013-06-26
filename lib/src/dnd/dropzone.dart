@@ -22,7 +22,7 @@ class DropzoneGroup extends Group {
   StreamController<DropzoneEvent> _onDrop;
   
   /**
-   * Fired when the mouse is first moved over this dropzone while dragging the 
+   * Fired when the mouse is first moved over a dropzone while dragging the 
    * current drag element.
    */
   Stream<DropzoneEvent> get onDragEnter {
@@ -34,7 +34,7 @@ class DropzoneGroup extends Group {
   }
   
   /**
-   * Fired as the mouse is moved over this dropzone when a drag of is occuring. 
+   * Fired as the mouse is moved over a dropzone when a drag of is occuring. 
    */
   Stream<DropzoneEvent> get onDragOver {
     if (_onDragOver == null) {
@@ -45,7 +45,7 @@ class DropzoneGroup extends Group {
   }
   
   /**
-   * Fired when the mouse leaves the dropzone element while dragging.
+   * Fired when the mouse leaves a dropzone element while dragging.
    */
   Stream<DropzoneEvent> get onDragLeave {
     if (_onDragLeave == null) {
@@ -57,7 +57,7 @@ class DropzoneGroup extends Group {
   
   /**
    * Fired at the end of the drag operation when the draggable is dropped
-   * inside this dropzone.
+   * inside a dropzone.
    */
   Stream<DropzoneEvent> get onDrop {
     if (_onDrop == null) {
@@ -181,9 +181,9 @@ class DropzoneGroup extends Group {
    */
   bool _dropAllowed() {
     String dropEffect = currentDraggableGroup.dropEffect;
-    return dropEffect == DraggableGroup.DROP_EFFECT_COPY
-        || dropEffect == DraggableGroup.DROP_EFFECT_LINK
-        || dropEffect == DraggableGroup.DROP_EFFECT_MOVE;
+    return dropEffect == DROP_EFFECT_COPY
+        || dropEffect == DROP_EFFECT_LINK
+        || dropEffect == DROP_EFFECT_MOVE;
   }
 }
 

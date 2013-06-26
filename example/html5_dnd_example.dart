@@ -59,19 +59,19 @@ sectionDraggingDivs() {
 sectionDropEffects() {
   // Install draggables.
   DraggableGroup dragGroupMove = new DraggableGroup()
-  ..dropEffect = 'move'
+  ..dropEffect = DROP_EFFECT_MOVE
   ..install(query('#drop-effects .move'));
   
   DraggableGroup dragGroupCopy = new DraggableGroup()
-  ..dropEffect = 'copy'
+  ..dropEffect = DROP_EFFECT_COPY
   ..install(query('#drop-effects .copy'));
   
   DraggableGroup dragGroupLink = new DraggableGroup()
-  ..dropEffect = 'link'
+  ..dropEffect = DROP_EFFECT_LINK
   ..install(query('#drop-effects .link'));
   
   DraggableGroup dragGroupNone = new DraggableGroup()
-  ..dropEffect = 'none'
+  ..dropEffect = DROP_EFFECT_NONE
   ..install(query('#drop-effects .none'));
   
   // Install dropzone.

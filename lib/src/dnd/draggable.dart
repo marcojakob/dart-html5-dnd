@@ -6,15 +6,15 @@ Element currentDraggable;
 /// The [DraggableGroup] the [currentDraggable] belongs to.
 DraggableGroup currentDraggableGroup;
 
+const DROP_EFFECT_NONE = 'none';
+const DROP_EFFECT_COPY = 'copy';
+const DROP_EFFECT_LINK = 'link';
+const DROP_EFFECT_MOVE = 'move';
+
 /**
  * Manages a group of draggables and their options and event listeners.
  */
 class DraggableGroup extends Group {
-  static const DROP_EFFECT_NONE = 'none';
-  static const DROP_EFFECT_COPY = 'copy';
-  static const DROP_EFFECT_LINK = 'link';
-  static const DROP_EFFECT_MOVE = 'move';
-  
   // -------------------
   // Draggable Options
   // -------------------
@@ -31,7 +31,7 @@ class DraggableGroup extends Group {
   String draggingClass = 'dnd-dragging';
   
   /**
-   * CSS class set to the dropzone [element] when a draggable is dragged over 
+   * CSS class set to the dropzone element when a draggable is dragged over 
    * it. Default is 'dnd-over'. If null, no css class is added.
    */
   String overClass = 'dnd-over';
@@ -67,7 +67,7 @@ class DraggableGroup extends Group {
   StreamController<DraggableEvent> _onDragEnd;
   
   /**
-   * Fired when the user starts dragging this draggable.
+   * Fired when the user starts dragging a draggable of this group.
    */
   Stream<DraggableEvent> get onDragStart {
     if (_onDragStart == null) {
@@ -78,7 +78,8 @@ class DraggableGroup extends Group {
   }
   
   /**
-   * Fired every time the mouse is moved while this draggable is being dragged.
+   * Fired periodically throughout the drag operation. If drag and drop is
+   * emulated, drag events are only fired when the mouse is moved.
    */
   Stream<DraggableEvent> get onDrag {
     if (_onDrag == null) {
@@ -89,12 +90,11 @@ class DraggableGroup extends Group {
   }
   
   /**
-   * Fired when the user releases the mouse button while dragging this 
-   * draggable. Is also fired when the user clicks the 'esc'-key or the 
-   * window loses focus. For those two cases, the mouse positions of 
-   * [DraggableEvent] will be null.
+   * Fired when the user releases the mouse button while dragging a draggable. 
+   * Is also fired when the user clicks the 'esc'-key or the window loses focus. 
+   * For those two cases, the mouse positions of [DraggableEvent] will be null.
    * 
-   * [onDragEnd] is called after onDrop in case there was a drop.
+   * Note: dragEnd is fired after drop in case there was a drop.
    */
   Stream<DraggableEvent> get onDragEnd {
     if (_onDragEnd == null) {
