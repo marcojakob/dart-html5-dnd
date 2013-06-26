@@ -18,7 +18,7 @@ Helper library to simplify **HTML5 Drag and Drop** in Dart.
 See [HTML5 Drag and Drop in action](http://edu.makery.ch/projects/dart-html5-drag-and-drop)
 (with code examples).
 
-[![Drag and Drop Example](https://raw.github.com/marcojakob/html5_dnd/master/doc/dnd-example.png)](http://edu.makery.ch/projects/dart-html5-drag-and-drop)
+[![Drag and Drop Example](https://raw.github.com/marcojakob/dart-html5-dnd/master/doc/dnd-example.png)](http://edu.makery.ch/projects/dart-html5-drag-and-drop)
 
 All examples are also available in the `example` directory on GitHub.
 
