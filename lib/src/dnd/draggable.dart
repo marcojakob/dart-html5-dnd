@@ -172,7 +172,10 @@ class DraggableGroup extends Group {
       // Defer adding the dragging class until the end of the event loop.
       // This makes sure that the style is not applied to the drag image.
       Timer.run(() {
-        element.classes.add(draggingClass);
+        // Test if we're actually still dragging.
+        if (currentDraggable != null) {
+          element.classes.add(draggingClass);
+        }
       });
     }
     if (dragOccurringClass != null) {
