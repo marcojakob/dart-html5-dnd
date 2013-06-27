@@ -15,6 +15,7 @@ import '../html5_utils.dart' as html5;
 
 final _logger = new Logger("html5_dnd.sortable");
 
+/// The currently shown placeholder. 
 _Placeholder _currentPlaceholder;
 
 /**
@@ -35,7 +36,7 @@ class SortableGroup extends DraggableGroup implements DropzoneGroup {
   String placeholderClass = 'dnd-placeholder';
   
   /**
-   * If true, forces the placeholder to have the computed size of the dragged
+   * If true, forces placeholders to have the computed size of the dragged
    * element. Default is true.
    * 
    * **Note:** Placeholders should have at least the size of the dragged 
@@ -87,10 +88,12 @@ class SortableGroup extends DraggableGroup implements DropzoneGroup {
   // -------------------
   final DropzoneGroup _dropzoneGroup;
   
-  /// Subscription on dropzone dragEnter (one for the entire sortable group).
+  /// Subscriptions that need to be canceled on drag end.
+  List<StreamSubscription> _sortableSubs = new List<StreamSubscription>();
+  
+  /// Subscription if an element of this group is entered. Only canceld when the
+  /// last element of this group is removed.
   StreamSubscription _dragEnterSub;
-  /// Subscription on dropzone dragStart (one for the entire sortable group).
-  StreamSubscription _dragStartSub;
   
   /**
    * Constructor.
@@ -117,8 +120,9 @@ class SortableGroup extends DraggableGroup implements DropzoneGroup {
   /**
    * Installs sortable behaviour on [element] and registers it in this group.
    */
+  @override
   void install(Element element) {
-    _logger.finest('installing sortable');
+    _logger.finest('installing as sortable');
     // Sortable elements are at the same time draggables (superclass) and dropzones.
     
     // Install draggable behaviour.
@@ -130,27 +134,52 @@ class SortableGroup extends DraggableGroup implements DropzoneGroup {
     // Only install listeners once per SortableGroup.
     if (installedElements.length == 1) {
       _logger.finest('first element in this sortable group installed, add listeners');
-      // Create placeholder on dragStart (only possible when drag starts in a sortable)
-      _dragStartSub = onDragStart.listen((DraggableEvent event) {
-        _logger.finest('dragStart');
-        
-        _currentPlaceholder = new _Placeholder(event.draggable, currentDraggableGroup);
-      });
       
-      // Show placeholder when an item of this group is entered.
-      _dragEnterSub = _dropzoneGroup.onDragEnter.listen((DropzoneEvent event) {
-        _logger.finest('dragEnter');
-        
-        // Test if there already is a placeholder.
-        if (_currentPlaceholder == null) {
-          _currentPlaceholder = new _Placeholder(event.draggable, 
-              currentDraggableGroup);
-        }
-        
-        // Show a placeholder for the entered dropzone.
-        _currentPlaceholder.showPlaceholder(event.dropzone, this);
-      });
+      _listenToDragEnter();
     }
+  }
+  
+  void _listenToDragEnter() {
+    // Show placeholder when an item of this group is entered.
+    _dragEnterSub = _dropzoneGroup.onDragEnter.listen((DropzoneEvent event) {
+      _logger.finest('dragEnter');
+        
+      // Test if there already is a placeholder.
+      if (_currentPlaceholder == null) {
+        _currentPlaceholder = new _Placeholder(currentDraggable, 
+            currentDraggableGroup);
+        _listenToDrop();
+        _listenToDragEnd();
+      }
+        
+      // Show the placeholder for the entered dropzone.
+      _currentPlaceholder.showPlaceholder(event.dropzone, this);
+    });
+  }
+  
+  void _listenToDrop() {
+    _sortableSubs.add(onDrop.listen((DropzoneEvent event) {
+      _logger.finest('drop');
+      if (_currentPlaceholder != null) {
+        _currentPlaceholder.hidePlaceholder(dropped: true);
+      }
+    }));
+  }
+  
+  void _listenToDragEnd() {
+    // Clean up on dragEnd.
+    _sortableSubs.add(onDragEnd.listen((_) {
+      _logger.finest('dragEnd');
+      
+      // Hide currently shown placeholder.
+      if (_currentPlaceholder != null) {
+        _currentPlaceholder.hidePlaceholder(dropped: false);
+      }
+      
+      // Cancel subscriptions.
+      _sortableSubs.forEach((StreamSubscription s) => s.cancel());
+      _sortableSubs.clear();
+    }));
   }
   
   /**
@@ -168,8 +197,6 @@ class SortableGroup extends DraggableGroup implements DropzoneGroup {
       // Last sortable of this group was uninstalled --> cancel subscriptions.
       _dragEnterSub.cancel();
       _dragEnterSub = null;
-      _dragStartSub.cancel();
-      _dragStartSub = null;
     }
   }
 }
@@ -231,48 +258,48 @@ class SortableEvent {
  */
 class _Placeholder {
   /// The draggable that this placeholder is for.
-  final Element draggable;
+  final Element _draggable;
+  
+  final String _draggableWidth;
+  final String _draggableHeight;
   
   /// Position of the draggable element before dragging.
-  Position originalPosition;
-  
-  /// Current Position of the placeholder.
-  Position newPosition;
+  final Position _originalPosition;
   
   /// The group of the draggable element before dragging. 
   /// Might be a [DraggableGroup] or a [SortableGroup].
-  DraggableGroup originalGroup;
+  final DraggableGroup _originalGroup;
+  
+  /// Current Position of the placeholder.
+  Position _currentPosition;
   
   /// Current group of the placeholder.
-  SortableGroup newGroup;
+  SortableGroup _currentGroup;
   
   /// The placeholder element.
   Element placeholderElement;
+    
+  /// DragOver subscription used when dropzone is bigger than placeholder.
+  StreamSubscription _dropzoneOverSub;
   
   /// A [DropzoneGroup] just for the placeholder to receive events from draggable.
   DropzoneGroup _placeholderDropzoneGroup;
   
-  /// Flag to tell whether this dropzone was dropped.
-  bool _dropped = false;
-  
-  StreamSubscription _dropzoneOverSub; 
-  StreamSubscription _dropzoneDropSub; 
-  StreamSubscription _placeholderDropSub;
-  StreamSubscription _draggableEndSub;
-  
   /**
    * Creates a new placeholder for the specified [draggable].
    */
-  _Placeholder(this.draggable, this.originalGroup) {
-    // Save original position of draggable for later.
-    originalPosition = new Position(draggable.parent,
-        html5.getElementIndexInParent(draggable));
+  _Placeholder(Element draggable, DraggableGroup originalGroup) :
+    _draggable = draggable,
+    // Save draggable width and height because they are not available when 
+    // draggable is removed from the DOM.
+    _draggableWidth = draggable.getComputedStyle().width,
+    _draggableHeight = draggable.getComputedStyle().height,
+    _originalGroup = originalGroup,
+    _originalPosition = new Position(draggable.parent,
+        html5.getElementIndexInParent(draggable)){
     
-    // Create a new DropzoneGroup just for the placeholder.
-    _placeholderDropzoneGroup = new DropzoneGroup()
-    ..accept.add(originalGroup);
+    _createPlaceholderElement();
   }
-  
   
   /**
    * Shows the placeholder at the position of [dropzone].
@@ -284,42 +311,33 @@ class _Placeholder {
    */
   void showPlaceholder(Element dropzone, SortableGroup group) {
     _logger.finest('showPlaceholder');
-    newGroup = group;
     
-    if (placeholderElement == null) {
-      _createPlaceholderElement();
+    if (_currentGroup == null || _currentGroup != group) {
+      _currentGroup = group;
+      _applyGroupProperties(group);
     }
     
-    // If there is already a dragOver or drop subscription on a dropzone --> cancel.
+    // If there is already a dragOver subscription on a dropzone --> cancel.
     if (_dropzoneOverSub != null) {
       _dropzoneOverSub.cancel();
       _dropzoneOverSub = null;
     }
-    if (_dropzoneDropSub != null) {
-      _dropzoneDropSub.cancel();
-      _dropzoneDropSub = null;
-    }
     
     if (_isDropzoneHigher(dropzone) 
-        || (newGroup.isGrid && _isDropzoneWider(dropzone))) {
+        || (_currentGroup.isGrid && _isDropzoneWider(dropzone))) {
       _logger.finest('dropzone is bigger than placeholder, listening to dragOver events');
       
       // On elements that are bigger than the dropzone we must listen to 
       // dragOver events and determine from the mouse position, whether to 
       // change placeholder position.
-      _dropzoneOverSub = newGroup.onDragOver.listen((DropzoneEvent event) {
+      _dropzoneOverSub = _currentGroup.onDragOver.listen((DropzoneEvent event) {
         _logger.finest('placeholder (dropzone) dragOver');
         
         _showPlaceholderForBiggerDropzone(dropzone, event.mousePagePosition);
       });
       
-      _dropzoneDropSub = newGroup.onDrop.listen((DropzoneEvent event) {
-        _logger.finest('placeholder (dropzone) drop');
-        _dropped = true;
-      });
-      
     } else {
-      _logger.finest('dropzone is not bigger than placeholder, not listening to dragOver events');
+      _logger.finest('dropzone is not bigger than placeholder');
       
       Position dropzonePosition = new Position(dropzone.parent,
           html5.getElementIndexInParent(dropzone));
@@ -329,26 +347,42 @@ class _Placeholder {
   
   /**
    * Hides the placeholder and shows the draggable.
-   * If [revertToOriginal] is true, the draggable is shown at the 
-   * [originalPosition]. If false, it is shown at the current [newPosition].
+   * If [dropped] is true, the draggable is shown at the 
+   * [_currentPosition]. If false, it is shown at the [_originalPosition].
    */
-  void hidePlaceholder({bool revertToOriginal: false}) {
+  void hidePlaceholder({bool dropped: false}) {
+    // Remove placeholder element from DOM.
     placeholderElement.remove();
+    placeholderElement = null;
     
-    if (revertToOriginal) {
-      originalPosition.insert(draggable);      
-    } else {
-      newPosition.insert(draggable);
+    // Reset current placeholder so that no one else can call it.
+    _currentPlaceholder = null;
+    
+    if (dropped) {
+      _logger.finest('placeholder was dropped -> Show draggable at new position');
+      _currentPosition.insert(_draggable);
       
-      // Fire sort event
-      if (newPosition != originalPosition) {
+      // Fire sort update event if the position has changed.
+      if (_currentPosition != _originalPosition) {
         _logger.finest('firing onSortableComplete event');
         
-        if (newGroup._onSortUpdate != null) {
-          newGroup._onSortUpdate.add(new SortableEvent(draggable, 
-              originalPosition, newPosition, originalGroup, newGroup));
+        if (_currentGroup._onSortUpdate != null) {
+          _currentGroup._onSortUpdate.add(new SortableEvent(_draggable, 
+              _originalPosition, _currentPosition, _originalGroup, _currentGroup));
         }
       }
+      
+    } else {
+      // Not dropped. This means the drag ended outside of a placeholder or
+      // the drag was cancelled somehow (ESC-key, ...)
+      // Revert to state before dragging.
+      _logger.finest('placeholder not dropped -> Revert to state before dragging');
+      _originalPosition.insert(_draggable);      
+    }
+    
+    // Cancel all subscriptions.
+    if (_dropzoneOverSub != null) {
+      _dropzoneOverSub.cancel();
     }
   }
   
@@ -356,57 +390,38 @@ class _Placeholder {
    * Creates the [placeholderElement].
    */
   void _createPlaceholderElement() {
-    _logger.finest('creating new placeholder');
-    placeholderElement = new Element.tag(draggable.tagName);
-    _placeholderDropzoneGroup.install(placeholderElement);
+    _logger.finest('creating new placeholder element');
+    placeholderElement = new Element.tag(_draggable.tagName);
     
-    if (newGroup.placeholderClass != null) {
+    // Create a new DropzoneGroup just for the placeholder element.
+    _placeholderDropzoneGroup = new DropzoneGroup()
+    ..install(placeholderElement)
+    ..onDrop.listen((DropzoneEvent event) {
+      _logger.finest('drop on placeholder');
+      hidePlaceholder(dropped: true);
+    });
+  }
+  
+  /**
+   * Applies the [group]'s placeholder styling properties to the 
+   * [placeholderElement].
+   */
+  void _applyGroupProperties(SortableGroup group) {
+    if (_currentGroup.placeholderClass != null) {
       // The placeholder receives the placeholderClass CSS from its current group.
-      placeholderElement.classes.add(newGroup.placeholderClass);
+      placeholderElement.classes.add(_currentGroup.placeholderClass);
+    } else {
+      placeholderElement.classes.clear();
     }
     
-    if (newGroup.forcePlaceholderSize) {
+    if (_currentGroup.forcePlaceholderSize) {
       // Placeholder receives the computed size from the dragged element.
-      placeholderElement.style.height = draggable.getComputedStyle().height; 
-      placeholderElement.style.width = draggable.getComputedStyle().width;
+      placeholderElement.style.width = _draggableWidth;
+      placeholderElement.style.height = _draggableHeight;
+    } else {
+      placeholderElement.style.removeProperty('width');
+      placeholderElement.style.removeProperty('height');
     }
-    
-    // Listen for drops inside placeholder.
-    _placeholderDropSub = _placeholderDropzoneGroup.onDrop.listen((_) {
-      _logger.finest('placeholder drop');
-      _dropped = true;
-    });
-    
-    // Hide placeholder on dragEnd of draggable.
-    _draggableEndSub = originalGroup.onDragEnd.listen((_) {
-      _logger.finest('placeholder dragEnd');
-      if (_dropped) {
-        _logger.finest('placeholder was dropped -> Show draggable at new position');
-        // Hide placeholder and show draggable again at new position.
-        _currentPlaceholder.hidePlaceholder();
-      } else {
-        // Not dropped. This means the drag ended outside of a placeholder or
-        // the drag was cancelled somehow (ESC-key, ...)
-        // Revert to state before dragging.
-        _logger.finest('placeholder not dropped -> Revert to state before dragging');
-        _currentPlaceholder.hidePlaceholder(revertToOriginal: true);
-      }
-      
-      // Reset current placeholder.
-      _currentPlaceholder = null;
-      
-      // Cancel all subscriptions.
-      if (_dropzoneOverSub != null) {
-        _dropzoneOverSub.cancel();
-      }
-      if (_dropzoneDropSub != null) {
-        _dropzoneDropSub.cancel();
-      }
-      _placeholderDropSub.cancel();
-      _draggableEndSub.cancel();
-      
-      _placeholderDropzoneGroup.uninstall(placeholderElement);
-    });
   }
   
   /**
@@ -425,7 +440,7 @@ class _Placeholder {
       }
     }
     
-    if (newGroup.isGrid) {
+    if (_currentGroup.isGrid) {
       if (_isDropzoneWider(dropzone)) {
         if (_isInDisabledHorizontalRegion(dropzone, dropzonePosition, mousePagePosition)) {
           return; 
@@ -441,13 +456,17 @@ class _Placeholder {
    */
   void _doShowPlaceholder(Element dropzone, Position dropzonePosition) {
     // Show placeholder at the position of dropzone.
-    newPosition = dropzonePosition;
-    _logger.finest('showing placeholder at index ${newPosition.index}');
-    placeholderElement.remove(); // Might already be at a different position.
-    newPosition.insert(placeholderElement);
+    _currentPosition = dropzonePosition;
+    _logger.finest('showing placeholder at index ${_currentPosition.index}');
     
-    // Make sure the draggable element is removed.
-    draggable.remove();
+    // Placeholder might already be showing at a different position --> remove it.
+    placeholderElement.remove(); 
+    
+    // Insert in new position.
+    _currentPosition.insert(placeholderElement);
+    
+    // Make sure the draggable element is not showing.
+    _draggable.remove();
   }
   
   /**
@@ -476,9 +495,9 @@ class _Placeholder {
    */
   bool _isInDisabledVerticalRegion(Element dropzone, Position dropzonePosition, 
                                    Point mousePagePosition) {
-    if (newPosition != null 
-        && newPosition.parent == dropzonePosition.parent
-        && newPosition.index > dropzonePosition.index) {
+    if (_currentPosition != null 
+        && _currentPosition.parent == dropzonePosition.parent
+        && _currentPosition.index > dropzonePosition.index) {
       // Current placeholder position is after the new dropzone position.
       // --> Disabled region is in the bottom part of the dropzone.
       
@@ -500,17 +519,17 @@ class _Placeholder {
     // Calc the mouse position relative to the dropzone.
     num mouseRelativeLeft = mousePagePosition.x - css.pageOffset(dropzone).x;      
     
-    if (newPosition != null 
-        && newPosition.parent == dropzonePosition.parent) {
+    if (_currentPosition != null 
+        && _currentPosition.parent == dropzonePosition.parent) {
       
-      if (newPosition.index > dropzonePosition.index) {
+      if (_currentPosition.index > dropzonePosition.index) {
         // Current placeholder position is after the new dropzone position (with 
         // same parent) --> Disabled region is in the right part of the dropzone.
         if (mouseRelativeLeft > placeholderElement.clientWidth) {
           return true; // In disabled region.
         }
       }
-      if (newPosition.index < dropzonePosition.index) {
+      if (_currentPosition.index < dropzonePosition.index) {
         // Current placeholder position is after the new dropzone position.
         // --> Disabled region is in the left part of the dropzone.
         if (mouseRelativeLeft < placeholderElement.clientWidth) {
