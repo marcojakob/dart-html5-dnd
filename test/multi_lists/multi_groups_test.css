@@ -1,0 +1,12 @@
+body {
+}
+
+.dnd-placeholder {
+  border: 2px dashed #b3b3b3;
+  width: 100px;
+}
+
+.dnd-dragging {
+  opacity: 0.5;
+}
+

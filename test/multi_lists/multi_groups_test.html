@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/> 
+  
+  <title>Multi Groups Test</title>
+  
+  <link rel="stylesheet" href="multi_groups_test.css">
+</head>
+<body>
+  <div class="container">   
+    <p>SortableGroup a: accepts b only</p>
+    <ul id="group-a-sort">
+      <li>Item 1a</li>
+      <li>Item 2a</li>
+      <li>Item 3a</li>
+      <li>Item 4a</li>
+      <li>Item 5a</li>
+      <li>Item 6a</li>
+    </ul>
+    
+    <p>SortableGroup b: accepts a, b, and c</p>
+    <ul id="group-b-sort">
+      <li>Item 1b</li>
+      <li>Item 2b</li>
+      <li>Item 3b</li>
+      <li>Item 4b</li>
+      <li>Item 5b</li>
+      <li>Item 6b</li>
+    </ul>
+    
+    <p>DraggableGroup c</p>
+    <ul id="group-c-drag">
+      <li>Item 1c</li>
+      <li>Item 2c</li>
+      <li>Item 3c</li>
+      <li>Item 4c</li>
+      <li>Item 5c</li>
+      <li>Item 6c</li>
+    </ul>
+  </div>
+  
+  <script type="application/dart" src="multi_groups_test.dart"></script>
+  <script src="packages/browser/dart.js"></script>
+</body>
+</html>
