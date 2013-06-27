@@ -95,8 +95,6 @@ List<StreamSubscription> _installEmulatedDraggable(Element element, DraggableGro
     // -------------------
     // Drag ends with mouse up.
     _emulSubs.add(document.onMouseUp.listen((MouseEvent upEvent) {
-      _logger.finest('emulating dragEnd');
-      
       // Fire dragEnd and indicate that it was dropped.
       _emulateDragEnd(element, group, upEvent.target, upEvent.page, upEvent.client, 
           dropped: true);
@@ -167,26 +165,27 @@ void _emulateDragEnd(Element element, DraggableGroup group, EventTarget target,
                   Point mousePagePosition, Point mouseClientPosition, 
                   {bool dropped: false}) {
 
-  if (dropped) {
-    // Fire the drop event.
-    EventTarget realTarget = _getRealTarget(target, mouseClientPosition);
-    
-    realTarget.dispatchEvent(_createEmulatedMouseEvent(EMULATED_DROP, null, 
-        mousePagePosition, mouseClientPosition));  
-  }
-  
-  // Cancel all subscriptions that were added when drag started.
-  _emulSubs.forEach((StreamSubscription s) => s.cancel());
-  _emulSubs.clear();
-  
   if (_emulDragMoved) {
+    _logger.finest('emulating dragEnd');
     _emulDragImage._removeEumlatedDragImage();
+    
+    if (dropped) {
+      // Fire the drop event.
+      EventTarget realTarget = _getRealTarget(target, mouseClientPosition);
+      
+      realTarget.dispatchEvent(_createEmulatedMouseEvent(EMULATED_DROP, null, 
+                                                         mousePagePosition, mouseClientPosition));  
+    }
     
     group._handleDragEnd(element, mousePagePosition, mouseClientPosition);
   }
   
   // Restore cursor.
   _restoreCursor();
+  
+  // Cancel all subscriptions that were added when drag started.
+  _emulSubs.forEach((StreamSubscription s) => s.cancel());
+  _emulSubs.clear();
   
   // Reset variables.
   _emulDragHandled = false;
