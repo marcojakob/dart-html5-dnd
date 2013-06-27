@@ -22,7 +22,6 @@ main() {
   // Install Sortable examples.
   sectionSortableList();
   sectionSortableGrid();
-  sectionSortableListExclude();
   sectionSortableListHandles();
   sectionSortableTwoGroups();
 
@@ -162,14 +161,6 @@ sectionSortableGrid() {
   SortableGroup sortGroup = new SortableGroup()
   ..isGrid = true
   ..installAll(queryAll('#sortable-grid li'));
-  
-  // Only accept elements from this section.
-  sortGroup.accept.add(sortGroup);
-}
-
-sectionSortableListExclude() {
-  SortableGroup sortGroup = new SortableGroup()
-  ..installAll(queryAll('#sortable-list-exclude li:not(.disabled)'));
   
   // Only accept elements from this section.
   sortGroup.accept.add(sortGroup);

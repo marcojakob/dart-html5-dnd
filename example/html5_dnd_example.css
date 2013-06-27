@@ -344,18 +344,6 @@ article img {
 }
  
 /* --------------------------------------------------------------------------
- * Section: sortable-list-exclude
- * ------------------------------------------------------------------------*/
-#sortable-list-exclude .dnd-placeholder {
-  border: 1px dashed #CCC;
-  background: none;  
-}
-
-#sortable-list-exclude li:not(.disabled) {
-  cursor: move;
-}
- 
-/* --------------------------------------------------------------------------
  * Section: sortable-list-handles
  * ------------------------------------------------------------------------*/
 #sortable-list-handles .dnd-placeholder {
