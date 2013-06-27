@@ -18,6 +18,9 @@ final _logger = new Logger("html5_dnd.sortable");
 /// The currently shown placeholder. 
 _Placeholder _currentPlaceholder;
 
+/// Flag indicating that draggable was dropped on a valid sortable target.
+bool _dropped = false;
+
 /**
  * Manages a group of sortables and their options and event listeners.
  * 
@@ -140,16 +143,20 @@ class SortableGroup extends DraggableGroup implements DropzoneGroup {
   }
   
   void _listenToDragEnter() {
-    // Show placeholder when an item of this group is entered.
-    _dragEnterSub = _dropzoneGroup.onDragEnter.listen((DropzoneEvent event) {
+    _dragEnterSub = onDragEnter.listen((DropzoneEvent event) {
       _logger.finest('dragEnter');
         
       // Test if there already is a placeholder.
       if (_currentPlaceholder == null) {
         _currentPlaceholder = new _Placeholder(currentDraggable, 
             currentDraggableGroup);
+      }
+      
+      // The first time this group is enterered during a drag, drop and 
+      // dragEnd listeners are installed.
+      if (_sortableSubs.isEmpty) {
         _listenToDrop();
-        _listenToDragEnd();
+        _listenToDragEnd(currentDraggableGroup);
       }
         
       // Show the placeholder for the entered dropzone.
@@ -161,24 +168,28 @@ class SortableGroup extends DraggableGroup implements DropzoneGroup {
     _sortableSubs.add(onDrop.listen((DropzoneEvent event) {
       _logger.finest('drop');
       if (_currentPlaceholder != null) {
-        _currentPlaceholder.hidePlaceholder(dropped: true);
+        // Just set dropped to true and let dragEnd handle it.
+        _dropped = true;
       }
     }));
   }
   
-  void _listenToDragEnd() {
+  void _listenToDragEnd(DraggableGroup group) {
     // Clean up on dragEnd.
-    _sortableSubs.add(onDragEnd.listen((_) {
+    _sortableSubs.add(group.onDragEnd.listen((_) {
       _logger.finest('dragEnd');
-      
-      // Hide currently shown placeholder.
-      if (_currentPlaceholder != null) {
-        _currentPlaceholder.hidePlaceholder(dropped: false);
-      }
       
       // Cancel subscriptions.
       _sortableSubs.forEach((StreamSubscription s) => s.cancel());
       _sortableSubs.clear();
+      
+      // Hide placeholder if one is currently shown.
+      if (_currentPlaceholder != null) {
+        _currentPlaceholder.hidePlaceholder(dropped: _dropped);
+      }
+      
+      // Reset dropped.
+      _dropped = false;
     }));
   }
   
@@ -347,8 +358,8 @@ class _Placeholder {
   
   /**
    * Hides the placeholder and shows the draggable.
-   * If [dropped] is true, the draggable is shown at the 
-   * [_currentPosition]. If false, it is shown at the [_originalPosition].
+   * If [dropped] is true, the draggable is shown at the [_currentPosition]. 
+   * If false, it is shown at the [_originalPosition].
    */
   void hidePlaceholder({bool dropped: false}) {
     // Remove placeholder element from DOM.
@@ -398,7 +409,9 @@ class _Placeholder {
     ..install(placeholderElement)
     ..onDrop.listen((DropzoneEvent event) {
       _logger.finest('drop on placeholder');
-      hidePlaceholder(dropped: true);
+      
+      // Just set dropped to true and let dragEnd of sortable group handle the rest.
+      _dropped = true;
     });
   }
   
