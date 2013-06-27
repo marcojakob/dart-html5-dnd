@@ -188,8 +188,10 @@ sectionSortableTwoGroups() {
       dragImageFunction: (Element draggable) => new DragImage(png, 5, 5))
   ..installAll(queryAll('#sortable-two-groups .group2 li'))
   ..onSortUpdate.listen((SortableEvent event) {
-    event.originalGroup.uninstall(event.draggable);
-    event.newGroup.install(event.draggable);
+    if (event.originalGroup != event.newGroup) {
+      event.originalGroup.uninstall(event.draggable);
+      event.newGroup.install(event.draggable);
+    }
   });
   
   // Only accept elements from this section.
