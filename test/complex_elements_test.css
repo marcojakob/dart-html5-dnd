@@ -1,0 +1,37 @@
+body {
+}
+
+.dnd-placeholder {
+  border: 2px dashed #b3b3b3;
+  display: block;
+}
+
+.dnd-dragging {
+  opacity: 0.5;
+}
+
+.group {
+  cursor: move;
+}
+
+a.group {
+  display: block;
+  width: 50px;
+  height: 50px;
+}
+
+.group:not(.dnd-drag-occurring):hover {
+  background-color: #f5f5f5;
+  -webkit-transition: background-color linear .15s;
+  -moz-transition: background-color linear .15s;
+  -o-transition: background-color linear .15s;
+  transition: background-color linear .15s;
+}
+
+.group .action-buttons {
+  display: none;
+}
+
+.group:not(.dnd-drag-occurring):hover .action-buttons {
+  display: inline-block;
+}

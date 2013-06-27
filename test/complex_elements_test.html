@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/> 
+  
+  <title>Dart HTML5 Drag and Drop</title>
+  
+  <link rel="stylesheet" href="complex_elements_test.css">
+</head>
+<body>
+  <div class="container">   
+    <a id="link" class="group" href="http://www.google.com">google link</a>
+  
+    <div id="a-group" class="group">    
+      <form id="a-form">
+        <div id="a-form-row1" class="form-row">
+          <label for="a-text"><strong>a)</strong></label>
+          <div class="action-buttons">
+            <button type="button">delete</button>
+            <button type="button">edit</button>
+          </div>
+        </div>
+        <textarea rows="8" id="a-text">Text a</textarea>
+          
+        <div id="a-form-row2" class="form-row">
+          <label for="a-hints">Hints</label>
+          <div>
+            <label for="a-counter">Counter</label>
+            <input type="number" id="a-counter">
+          </div>
+        </div>
+        <textarea rows="5" id="a-hints">Hints a</textarea>
+      </form>
+    </div>
+    
+    <div id="b-group" class="group">    
+      <form id="b-form">
+        <div id="b-form-row1" class="form-row">
+          <label for="b-text"><strong>b)</strong></label>
+          <div class="action-buttons">
+            <button type="button">delete</button>
+            <button type="button">edit</button>
+          </div>
+        </div>
+        <textarea rows="8" id="b-text">Text b</textarea>
+          
+        <div id="b-form-row2" class="form-row">
+          <label for="b-hints">Hints</label>
+          <div>
+            <label for="b-counter">Counter</label>
+            <input type="number" id="b-counter">
+          </div>
+        </div>
+        <textarea rows="5" id="b-hints">Hints b</textarea>
+      </form>
+    </div>
+    
+    <div id="c-group" class="group">    
+      <form id="c-form-row1" id="c-form">
+        <div class="form-row">
+          <label for="c-text"><strong>c)</strong></label>
+          <div class="action-buttons">
+            <button type="button">delete</button>
+            <button type="button">edit</button>
+          </div>
+        </div>
+        <textarea rows="8" id="c-text">Text c</textarea>
+          
+        <div id="c-form-row2" class="form-row">
+          <label for="c-hints">Hints</label>
+          <div>
+            <label for="c-counter">Counter</label>
+            <input type="number" id="c-counter">
+          </div>
+        </div>
+        <textarea rows="5" id="c-hints">Hints c</textarea>
+      </form>
+    </div>
+    
+    <div id="d-group" class="group">    
+      <form id="d-form">
+        <div id="d-form-row1" class="form-row">
+          <label for="d-text"><strong>d)</strong></label>
+          <div class="action-buttons">
+            <button type="button">delete</button>
+            <button type="button">edit</button>
+          </div>
+        </div>
+        <textarea rows="8" id="d-text">Text d</textarea>
+          
+        <div id="d-form-row2" class="form-row">
+          <label for="d-hints">Hints</label>
+          <div>
+            <label for="d-counter">Counter</label>
+            <input type="number" id="d-counter">
+          </div>
+        </div>
+        <textarea rows="5" id="d-hints">Hints d</textarea>
+      </form>
+    </div>
+  
+  </div>
+  
+  
+  <script type="application/dart" src="complex_elements_test.dart"></script>
+  <script src="packages/browser/dart.js"></script>
+</body>
+</html>
