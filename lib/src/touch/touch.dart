@@ -12,70 +12,78 @@ part of html5_dnd;
 List<StreamSubscription> _installTouchEvents(Element element, DraggableGroup group) {
   List<StreamSubscription> subs = new List<StreamSubscription>();
   
-  Element elementHandle = element;
-  // If requested, use handle.
-  if (group.handle != null) {
-    elementHandle = element.query(group.handle);
-  }
-  
-  // -------------------
-  // On TouchStart emulate DragStart
-  // -------------------
-  subs.add(elementHandle.onTouchStart.listen((TouchEvent event) {
+  subs.add(element.onTouchStart.listen((TouchEvent startEvent) {
     // Ignore the event if another widget is already being handled or if 
     // it is a multi-touch event.
-    if (_emulDragHandled || event.touches.length > 1) return;
+    if (_emulDragHandled || startEvent.touches.length > 1) return;
+  
+    Touch startTouch = startEvent.changedTouches[0];
+    // Get the element the finger is actually over.
+    EventTarget startTarget = document.elementFromPoint(startTouch.client.x, startTouch.client.y);
     
-    _logger.finest('touchStart: emulating dragStart');
-    
-    event.preventDefault();
-    Touch touch = event.changedTouches[0];
+    // Return if no valid drag start target was touched.
+    if(!_isValidDragStartTarget(element, startTarget, group.handle, group.cancel)) return;
     
     // Set the flag to prevent other widgets from inheriting the touch event
     _emulDragHandled = true;
     
-    _emulateDragStart(element, group, touch.page, touch.client);
-  }));
-  
-  // -------------------
-  // On TouchMove emulate Drag
-  // -------------------
-  subs.add(elementHandle.onTouchMove.listen((TouchEvent event) {
-    // Ignore the event if NOT handled or if it is a multi-touch event.
-    if (!_emulDragHandled || event.touches.length > 1) return;
+    // Remove all text selections.
+    html5.clearTextSelections();
     
-    event.preventDefault();
-    Touch touch = event.changedTouches[0];
+    _emulSubs.add(element.onTouchMove.listen((TouchEvent moveEvent) {
+      // Ignore the event if it is a multi-touch event.
+      if (moveEvent.touches.length > 1) return;
+      
+      // Prvent scrolling.
+      moveEvent.preventDefault();
+      
+      Touch moveTouch = moveEvent.changedTouches[0];
+      
+      if (!_emulDragMoved && _distanceMet(startTouch.page, moveTouch.page)) {
+        // The drag start distance was met. Actually start the drag.
+        
+        // -------------------
+        // Emulate DragStart
+        // -------------------
+        _logger.finest('touch: emulating dragStart');
+        
+        _emulDragMoved = true;
+        _emulateDragStart(element, group, startTouch.page, startTouch.client);
+      }
+      
+      if (_emulDragMoved) {
+        // -------------------
+        // Emulate Drag
+        // -------------------
+        
+        // Get the element the finger is actually over.
+        EventTarget moveTarget = document.elementFromPoint(moveTouch.client.x, moveTouch.client.y);
+        
+        _emulateDrag(element, group, moveTarget, moveTouch.page, moveTouch.client);
+      }
+    }));
     
-    // The target in TouchEvent or Touch is always the element the touch 
-    // originated. Get the element the finger is actually over.
-    EventTarget target = document.elementFromPoint(touch.client.x, touch.client.y);
-    
-    // Interaction was not a click
-    _emulDragMoved = true;
-    
-    _emulateDrag(element, group, target, touch.page, touch.client);
-  }));
-  
-  // -------------------
-  // On TochEnd emulate DragEnd
-  // -------------------
-  subs.add(elementHandle.onTouchEnd.listen((TouchEvent event) {
-    // Ignore the event if NOT handled or if it is a multi-touch event.
-    if (!_emulDragHandled || event.touches.length > 1) return;
-    
-    _logger.finest('touchEnd: emulating dragEnd');
+    // -------------------
+    // Emulate DragEnd
+    // -------------------
+    _emulSubs.add(element.onTouchEnd.listen((TouchEvent endEvent) {
+      // Ignore the event if it is a multi-touch event.
+      if (endEvent.touches.length > 1) return;
+      
+      _logger.finest('touch: emulating dragEnd');
 
-    event.preventDefault();
-    Touch touch = event.changedTouches[0];
+      endEvent.preventDefault();
+      Touch endTouch = endEvent.changedTouches[0];
+      
+      // Get the element the finger is actually over.
+      EventTarget endTarget = document.elementFromPoint(endTouch.client.x, 
+          endTouch.client.y);
+      
+      _emulateDragEnd(element, group, endTarget, endTouch.page, endTouch.client, 
+          dropped: true);
+    }));
     
-    // The target in TouchEvent or Touch is always the element the touch 
-    // originated. Get the element the finger is actually over.
-    EventTarget target = document.elementFromPoint(touch.client.x, touch.client.y);
-    
-    _emulateDragEnd(element, group, target, touch.page, touch.client, 
-        dropped: true);
-  }));
+  })); // TouchStart.
   
   return subs;
 }
