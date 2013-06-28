@@ -108,10 +108,15 @@ class SortableGroup extends DraggableGroup implements DropzoneGroup {
    * If [handle] is set to a value other than null, it is used as query String
    * to find a subelement of elements in this group. The drag is then 
    * restricted to that subelement.
+   * 
+   * If [cancel] is set to a value other than null, starting a drag is prevented 
+   * on specified elements. It is a used as query String to find a subelement of 
+   * elements in this group. Default is 'input,textarea,button,select,option'.
    */
-  SortableGroup({DragImageFunction dragImageFunction: null, String handle: null}) :
+  SortableGroup({DragImageFunction dragImageFunction: null, String handle: null, 
+      String cancel: 'input,textarea,button,select,option'}) :
     _dropzoneGroup = new DropzoneGroup(),
-    super(dragImageFunction: dragImageFunction, handle: handle) {
+    super(dragImageFunction: dragImageFunction, handle: handle, cancel: cancel) {
     
     // Disable overClass by default for sortable as we're usually only over the 
     // placeholder and not over a dropzone. Same for draggingClass as the 
