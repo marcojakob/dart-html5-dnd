@@ -28,6 +28,18 @@ int getElementIndexInParent(Element element) {
 }
 
 /**
+ * Removes all text selections from the HTML document, including selections
+ * in active textarea or active input element.
+ */
+void clearTextSelections() {
+  window.getSelection().removeAllRanges();
+  var activeElement = document.activeElement;
+  if (activeElement is TextAreaElement || activeElement is InputElement) {
+    activeElement.setSelectionRange(0, 0);
+  }
+}
+
+/**
  * Returns true if the HTML5 Draggable Element is supported. 
  * IE9 will return false.
  */

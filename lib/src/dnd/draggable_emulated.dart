@@ -49,16 +49,17 @@ List<StreamSubscription> _installEmulatedDraggable(Element element, DraggableGro
   // Subscriptions to uninstall element.
   List<StreamSubscription> subs = new List<StreamSubscription>();
   
-  Element elementHandle = element;
-  // If requested, use handle.
-  if (group.handle != null) {
-    elementHandle = element.query(group.handle);
-  }
-  
   // Listen for mouseDown.
-  subs.add(elementHandle.onMouseDown.listen((MouseEvent downEvent) {
+  subs.add(element.onMouseDown.listen((MouseEvent downEvent) {
     // Don't let more than one widget handle mouseStart and only handle left button.
-    if (_emulDragHandled || downEvent.button != 0) return; 
+    // And only handle dragStart if a valid drag start target was clicked.
+    if (_emulDragHandled || downEvent.button != 0 || !_isValidDragStartTarget(
+            element, downEvent.target, group.handle, group.cancel)) 
+      return;
+    
+    // Text selections should not be a problem with emulated draggable, but it
+    // seems better usability to remove text selection when dragging something.
+    html5.clearTextSelections();
     
     // Set the flag to prevent other widgets from inheriting the event
     _emulDragHandled = true;
@@ -68,14 +69,15 @@ List<StreamSubscription> _installEmulatedDraggable(Element element, DraggableGro
     
     // Subscribe to mouseMove on entire document.
     _emulSubs.add(document.onMouseMove.listen((MouseEvent moveEvent) {
-      if (!_emulDragMoved 
-          && _dragStartMouseDistanceMet(mouseDownEvent.page, moveEvent.page)) {
-        _emulDragMoved = true;
+      if (!_emulDragMoved && _distanceMet(mouseDownEvent.page, moveEvent.page)) {
+        // The drag start distance was met. Actually start the drag.
         
         // -------------------
         // Emulate DragStart
         // -------------------
         _logger.finest('emulating dragStart');
+        
+        _emulDragMoved = true;
         _emulateDragStart(element, group, mouseDownEvent.page, mouseDownEvent.client);
       }
       
@@ -93,7 +95,6 @@ List<StreamSubscription> _installEmulatedDraggable(Element element, DraggableGro
     // -------------------
     // Emulate DragEnd
     // -------------------
-    // Drag ends with mouse up.
     _emulSubs.add(document.onMouseUp.listen((MouseEvent upEvent) {
       // Fire dragEnd and indicate that it was dropped.
       _emulateDragEnd(element, group, upEvent.target, upEvent.page, upEvent.client, 
@@ -245,10 +246,10 @@ void _dispatchDropzoneEvents(Element element, EventTarget mouseEventTarget,
 /**
  * Detects if the mouse has been moved enough to start the dragging.
  */
-bool _dragStartMouseDistanceMet(Point mouseDownPagePosition, Point mousePagePosition) {
+bool _distanceMet(Point startPoint, Point endPoint) {
   return math.max(
-      (mouseDownPagePosition.x - mousePagePosition.x).abs(),
-      (mouseDownPagePosition.y - mousePagePosition.y).abs()
+      (startPoint.x - endPoint.x).abs(),
+      (startPoint.y - endPoint.y).abs()
   ) >= 1;
 }
 

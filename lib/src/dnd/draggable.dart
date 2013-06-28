@@ -53,11 +53,18 @@ class DraggableGroup extends Group {
   final DragImageFunction dragImageFunction;
   
   /**
-   * If [handle] is set to a value other than null, it is used as query String
-   * to find a subelement of elements in this group. The drag is then 
-   * restricted to that subelement.
+   * If [handle] is set to a value other than null, the drag is restricted to 
+   * that element. It is used as query String to find a subelement of elements 
+   * in this group. 
    */
   final String handle;
+  
+  /**
+   * If [cancel] is set to a value other than null, starting a drag is prevented 
+   * on specified elements. It is a used as query String to find a subelement of 
+   * elements in this group. Default is 'input,textarea,button,select,option'.
+   */
+  final String cancel;
   
   // -------------------
   // Draggable Events
@@ -113,11 +120,16 @@ class DraggableGroup extends Group {
    * draggable. If it is null (the default), the drag image is created from 
    * the draggable element. 
    * 
-   * If [handle] is set to a value other than null, it is used as query String
-   * to find a subelement of elements in this group. The drag is then 
-   * restricted to that subelement.
+   * If [handle] is set to a value other than null, the drag is restricted to 
+   * that element. It is used as query String to find a subelement of elements 
+   * in this group. 
+   * 
+   * If [cancel] is set to a value other than null, starting a drag is prevented 
+   * on specified elements. It is a used as query String to find a subelement of 
+   * elements in this group. Default is 'input,textarea,button,select,option'.
    */
-   DraggableGroup({this.dragImageFunction, this.handle}) {
+   DraggableGroup({this.dragImageFunction, this.handle, 
+      this.cancel: 'input,textarea,button,select,option'}) {
     // Must emulate if either browser does not support HTML5 draggable 
     // (IE9) or there is a custom drag image and browser does not support
     // setDragImage (IE10).
@@ -230,34 +242,38 @@ class DraggableGroup extends Group {
 List<StreamSubscription> _installDraggable(Element element, DraggableGroup group) {
   List<StreamSubscription> subs = new List<StreamSubscription>();
   
-  // Enable native dragging.
-  element.attributes['draggable'] = 'true';
-  
-  // If requested, use handle.
-  bool isHandle = false;
-  if (group.handle != null) {
-    Element elementHandle = element.query(group.handle);    
+  // Test if user starts drag on a valid element.
+  bool validDragStartTarget = false;
+  subs.add(element.onMouseDown.listen((MouseEvent mouseEvent) {
+    _logger.finest('mouseDown');
+    validDragStartTarget = _isValidDragStartTarget(element, mouseEvent.target, group.handle, group.cancel);
     
-    if (elementHandle != null) {
-      subs.add(elementHandle.onMouseDown.listen((_) {
-        _logger.finest('element handle mouseDown');
-        isHandle = true;
-      }));
-      subs.add(elementHandle.onMouseUp.listen((_) {
-        _logger.finest('element handle mouseUp');
-        isHandle = false;
-      }));
+    if (validDragStartTarget) {
+      // Enable native dragging.
+      element.attributes['draggable'] = 'true';
+      
+      // Remove all text selections. Selections can otherwise lead to strange
+      // behaviour when present on dragStart.
+      html5.clearTextSelections();
+      
+      // Remove draggable attribute on mouse up (anywhere on document).
+      StreamSubscription upSub;
+      upSub = document.onMouseUp.listen((MouseEvent upEvent) {
+        element.attributes.remove('draggable');
+        upSub.cancel();
+      });
+    } else {
+      // Disable native dragging.
+      element.attributes.remove('draggable');
     }
-  }
+  }));
   
   // -------------------
   // DragStart
   // -------------------
   subs.add(element.onDragStart.listen((MouseEvent mouseEvent) {
-    if (group.handle != null && !isHandle) {
-      mouseEvent.preventDefault();
-      return;
-    }
+    // Only handle dragStart if a valid drag start target was clicked before.
+    if (!validDragStartTarget) return;
     _logger.finest('dragStart');
     
     // In Firefox it is possible to start selection outside of a draggable,
@@ -308,11 +324,41 @@ List<StreamSubscription> _installDraggable(Element element, DraggableGroup group
     group._handleDragEnd(element, mouseEvent.page, mouseEvent.client);
     
     // Reset variables.
-    isHandle = false;
+    validDragStartTarget = false;
     _lastDragEnterTarget = null;
+    
+    // Remove the (possibly) added draggable attribute.
+    element.attributes.remove('draggable');
   }));
   
   return subs;
+}
+
+/**
+ * Tests if [target] is a valid place to start a drag. If [handle] is
+ * provided, drag can only start on one or many handles. If [cancel] is 
+ * provided, drag cannot be started on those elements.
+ * 
+ * [handle] and [cancel] are both query strings used to get query for a 
+ * subelement of [element]. 
+ */
+bool _isValidDragStartTarget(Element element, EventTarget target, 
+                             String handle, String cancel) {
+  if (handle != null) {
+    List<Element> handles = element.queryAll(handle);
+    if (!handles.contains(target)) {
+      return false;
+    }
+  }
+  
+  if (cancel != null) {
+    List<Element> cancels = element.queryAll(cancel);
+    if (cancels.contains(target)) {
+      return false;
+    }
+  }
+  
+  return true;
 }
 
 typedef DragImage DragImageFunction(Element draggable);
