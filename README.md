@@ -79,13 +79,16 @@ With `uninstall(...)` or `uninstallAll(...)` draggables can be removed from
 the group and the draggable behaviour is uninstalled.
 
 #### Draggable Options ####
-The `DraggableGroup` has two constructor options:
+The `DraggableGroup` has three constructor options:
 
 * The `dragImageFunction` is used to provide a custom `DragImage`. If no 
   `dragImageFunction` is supplied, the drag image is created from the HTML 
   element of the draggable.
-* If a `handle` is provided, it is used as query String to find a subelement of 
-  draggable elements. The drag is then restricted to that subelement.
+* If a `handle` is provided, it is used as query String to find subelements of 
+  draggable elements. The drag is then restricted to those elements.
+* If `cancel` is provided, it is used as query String to find a subelement of 
+  drabbable elements. The drag is then prevented on those elements.
+  The default is 'input,textarea,button,select,option'.
 
 ```dart
 // Create a custom drag image from a png.
@@ -99,8 +102,12 @@ DragImageFunction imageFunction = (Element draggable) {
 };
 
 // Create DraggableGroup with custom drag image and a handle.
-DraggableGroup dragGroup = new DraggableGroup(
+DraggableGroup dragGroupHandle = new DraggableGroup(
     dragImageFunction: imageFunction, handle: '.my-handle');
+    
+// Create DraggableGroup with a cancel query String.
+DraggableGroup dragGroupCancel = new DraggableGroup(
+    cancel: 'textarea, button, .no-drag');
 ```
 
 Other options of the `DraggableGroup`:

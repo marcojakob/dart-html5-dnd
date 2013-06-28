@@ -43,3 +43,13 @@ Changelog
   sortable is imported automatically. If some functionality like sortable isn't 
   used, Dart's treeshaking will make sure no unnecessary code is added.
 * Add extended usage documentation to readme.
+
+## Version 0.3.2 (2013-06-28) ##
+* Support 'cancel' query String to prevent dragging: A 'cancel' query String 
+  may be supplied for draggables to prevent starting a drag on specific elements.
+* Improve clearing of selection when drag starts.
+* Fix some bugs in touch support.
+* Firing sortUpdate events after dragEnd events: Firing sortUpdate at the end 
+  makes sure that the listener of update events can uninstall/install involved 
+  draggables without side-effects
+* Add some additional test examples.
