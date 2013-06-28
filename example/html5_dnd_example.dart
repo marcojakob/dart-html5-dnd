@@ -23,6 +23,7 @@ main() {
   sectionSortableList();
   sectionSortableGrid();
   sectionSortableListHandles();
+  sectionCancelDrag();
   sectionSortableTwoGroups();
 
   // Used for the code examples on the blog website.
@@ -172,6 +173,13 @@ sectionSortableListHandles() {
   
   // Only accept elements from this section.
   sortGroup.accept.add(sortGroup);
+}
+
+sectionCancelDrag() {
+  // Install draggable.
+  DraggableGroup dragGroup = new DraggableGroup(
+      cancel: 'textarea, button, .nodrag')
+  ..install(query('#cancel-drag .dragme'));
 }
 
 sectionSortableTwoGroups() {

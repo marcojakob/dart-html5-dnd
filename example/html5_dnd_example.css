@@ -354,6 +354,24 @@ article img {
 #sortable-list-handles span {
   cursor: move;
 }
+
+/* --------------------------------------------------------------------------
+ * Section: cancel-drag
+ * ------------------------------------------------------------------------*/
+#cancel-drag .dnd-dragging {
+  opacity: 0.5;
+}
+
+#cancel-drag .dragme {
+  padding: 5px;
+  border: 1px solid #aaa;
+  background: #acf;
+  cursor: move;
+}
+
+#cancel-drag .dragme * {
+  cursor: default;
+}
  
 /* --------------------------------------------------------------------------
  * Section: sortable-two-groups

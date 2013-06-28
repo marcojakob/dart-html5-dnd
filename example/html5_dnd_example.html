@@ -179,7 +179,7 @@
       </ul>
     </div>
     
-    <h2>Sortable List With Handles</h2>
+    <h2>Only Allow Drag on Handles</h2>
     <p>
       Items can only be dragged with the handle.
     </p>
@@ -192,6 +192,24 @@
         <li><span>::</span> Item 5</li>
         <li><span>::</span> Item 6</li>
       </ul>
+    </div>
+    
+    <h2>Prevent Drag on Some Elements</h2>
+    <p>
+      Starting a drag can be prevented on specified elements. In this example, 
+      drag can only be started on the outer div.
+    </p>
+    <p>
+      By default, elements of type input, textarea, button, select, or option 
+      are not draggable.
+    </p>
+    <div id="cancel-drag" class="example-container">
+      <div class="dragme example-box">
+        Drag me!
+        <div class="nodrag">No drag here!</div>
+        <textarea>No drag here!</textarea>
+        <button>No drag here!</button>
+      </div>
     </div>
     
     <h2>Two Sortable Groups</h2>
