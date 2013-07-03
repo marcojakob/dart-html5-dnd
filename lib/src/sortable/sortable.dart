@@ -10,8 +10,7 @@ import 'package:meta/meta.dart';
 import 'package:logging/logging.dart';
 
 import '../../html5_dnd.dart';
-import '../css_utils.dart' as css;
-import '../html5_utils.dart' as html5;
+import '../utils.dart' as utils;
 
 final _logger = new Logger("html5_dnd.sortable");
 
@@ -312,7 +311,7 @@ class _Placeholder {
     _draggableHeight = draggable.getComputedStyle().height,
     _originalGroup = originalGroup,
     _originalPosition = new Position(draggable.parent,
-        html5.getElementIndexInParent(draggable)){
+        utils.getElementIndexInParent(draggable)){
     
     _createPlaceholderElement();
   }
@@ -356,7 +355,7 @@ class _Placeholder {
       _logger.finest('dropzone is not bigger than placeholder');
       
       Position dropzonePosition = new Position(dropzone.parent,
-          html5.getElementIndexInParent(dropzone));
+          utils.getElementIndexInParent(dropzone));
       _doShowPlaceholder(dropzone, dropzonePosition);
     }
   }
@@ -449,7 +448,7 @@ class _Placeholder {
   void _showPlaceholderForBiggerDropzone(Element dropzone, 
                                          Point mousePagePosition) {
     Position dropzonePosition = new Position(dropzone.parent,
-        html5.getElementIndexInParent(dropzone));
+        utils.getElementIndexInParent(dropzone));
     
     if (_isDropzoneHigher(dropzone)) {
       if (_isInDisabledVerticalRegion(dropzone, dropzonePosition,
@@ -520,7 +519,7 @@ class _Placeholder {
       // --> Disabled region is in the bottom part of the dropzone.
       
       // Calc the mouse position relative to the dropzone.
-      num mouseRelativeTop = mousePagePosition.y - css.pageOffset(dropzone).y;
+      num mouseRelativeTop = mousePagePosition.y - utils.pageOffset(dropzone).y;
       if (mouseRelativeTop > placeholderElement.clientHeight) {
         return true; // In disabled region.
       }
@@ -535,7 +534,7 @@ class _Placeholder {
   bool _isInDisabledHorizontalRegion(Element dropzone, Position dropzonePosition, 
                                      Point mousePagePosition) {
     // Calc the mouse position relative to the dropzone.
-    num mouseRelativeLeft = mousePagePosition.x - css.pageOffset(dropzone).x;      
+    num mouseRelativeLeft = mousePagePosition.x - utils.pageOffset(dropzone).x;      
     
     if (_currentPosition != null 
         && _currentPosition.parent == dropzonePosition.parent) {

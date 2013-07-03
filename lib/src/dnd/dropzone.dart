@@ -319,8 +319,7 @@ EventTarget _lastDragEnterTarget;
  *   mouse entered to.
  */
 bool _isMainEvent(Element mainElement, EventTarget relatedTarget) {
-  return (relatedTarget == null 
-      || (relatedTarget != mainElement && !mainElement.contains(relatedTarget)));
+  return relatedTarget == null || (!utils.contains(mainElement, relatedTarget));
 }
 
 /**

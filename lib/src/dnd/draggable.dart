@@ -111,7 +111,7 @@ class DraggableGroup extends Group {
     return _onDragEnd.stream;
   }
   
-  bool _emulateDraggable = false;
+  bool _browserRequiresDraggableEmulation = false;
   
   /**
    * Constructor to create a [DraggableGroup].
@@ -133,13 +133,13 @@ class DraggableGroup extends Group {
     // Must emulate if either browser does not support HTML5 draggable 
     // (IE9) or there is a custom drag image and browser does not support
     // setDragImage (IE10).
-    if(!html5.supportsDraggable 
-        || (dragImageFunction != null && !html5.supportsSetDragImage)) {
+    if(!supportsDraggable 
+        || (dragImageFunction != null && !supportsSetDragImage)) {
       _logger.finest('Browser does not (completely) support HTML5 draggable.');
-      _emulateDraggable = true;
+      _browserRequiresDraggableEmulation = true;
     } else {
       _logger.finest('Browser does support HTML5 draggable.');
-      _emulateDraggable = false;
+      _browserRequiresDraggableEmulation = false;
     }
   }
   
@@ -151,7 +151,7 @@ class DraggableGroup extends Group {
     
     List<StreamSubscription> subs = new List<StreamSubscription>();
     
-    if (_emulateDraggable || element is svg.SvgElement) {
+    if (_browserRequiresDraggableEmulation || element is svg.SvgElement) {
       _logger.finest('installing as emulated draggable');
       subs.addAll(_installEmulatedDraggable(element, this));
     } else {
@@ -160,7 +160,7 @@ class DraggableGroup extends Group {
     }
     
     // Install touch events if enabled and supported.
-    if (_useTouchEvents()) {
+    if (usesTouchEvents()) {
       _logger.finest('installing touch support');
       subs.addAll(_installTouchEvents(element, this));
     }
@@ -254,7 +254,7 @@ List<StreamSubscription> _installDraggable(Element element, DraggableGroup group
       
       // Remove all text selections. Selections can otherwise lead to strange
       // behaviour when present on dragStart.
-      html5.clearTextSelections();
+      utils.clearTextSelections();
       
       // Remove draggable attribute on mouse up (anywhere on document).
       StreamSubscription upSub;
@@ -411,7 +411,7 @@ class DragImage {
    */
   DragImage._forDraggable(Element draggable, Point mousePosition) {
     // Calc the mouse position relative to the draggable.
-    Point draggableOffset = css.pageOffset(draggable);
+    Point draggableOffset = utils.pageOffset(draggable);
     this.x = (mousePosition.x - draggableOffset.x).round(); 
     this.y = (mousePosition.y - draggableOffset.y).round(); 
     
@@ -442,7 +442,7 @@ class DragImage {
   void _addEmulatedDragImage(Element draggable) {
     _logger.finest('Adding emulated drag image.');
     
-    var parent = draggable.parentNode;
+    Node parent = draggable.parentNode;
     
     // Walk parents until we find a non-SVG element. This is to handle cases
     // where we're dragging a node within an SVG document.
@@ -477,14 +477,4 @@ class DragImage {
     element.style.top = '${(newMousePagePosition.y - this.y)}px';
     element.style.visibility = 'visible';
   }
-  
-  bool _contains(EventTarget target) {
-    // If the drag image is an SvgElement, we need to do contains() differently.
-    // IE9 does not support the contains() method on SVG elements.
-    return element is svg.SvgElement ? _svgContains(element, target) : element.contains(target);
-  }
-}
-
-bool _svgContains(Element element, EventTarget target) {
-  return (target == element) ? true : element.children.any((e) => _svgContains(e, target));
 }

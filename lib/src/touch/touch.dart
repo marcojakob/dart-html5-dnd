@@ -28,7 +28,7 @@ List<StreamSubscription> _installTouchEvents(Element element, DraggableGroup gro
     _emulDragHandled = true;
     
     // Remove all text selections.
-    html5.clearTextSelections();
+    utils.clearTextSelections();
     
     _emulSubs.add(element.onTouchMove.listen((TouchEvent moveEvent) {
       // Ignore the event if it is a multi-touch event.

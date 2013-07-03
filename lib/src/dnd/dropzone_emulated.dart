@@ -94,13 +94,3 @@ List<StreamSubscription> _installEmulatedDropzone(Element element, DropzoneGroup
   
   return subs;
 }
-
-/**
- * Returns true if either [target1] is an ancestor of [target2] or 
- * [target2] is a an ancestor of [target1].
- */
-bool _areAncestors(EventTarget target1, EventTarget target2) {
-  if (target1 is! Element || target2 is! Element) return false;
-  
-  return target1.contains(target2) || target2.contains(target1);
-}

@@ -59,7 +59,7 @@ List<StreamSubscription> _installEmulatedDraggable(Element element, DraggableGro
       
     // Text selections should not be a problem with emulated draggable, but it
     // seems better usability to remove text selection when dragging something.
-    html5.clearTextSelections();
+    utils.clearTextSelections();
     
     // Set the flag to prevent other widgets from inheriting the event
     _emulDragHandled = true;
@@ -296,7 +296,7 @@ void _restoreCursor() {
 EventTarget _getRealTarget(EventTarget target, Point mouseClientPosition) {
   EventTarget realTarget = target;
   
-  if (_emulDragImage.element == target || _emulDragImage._contains(target)) {
+  if (utils.contains(_emulDragImage.element, target)) {
     // Forward events on the drag image to element underneath.
     _emulDragImage.element.style.visibility = 'hidden';
     realTarget = document.elementFromPoint(mouseClientPosition.x, 
