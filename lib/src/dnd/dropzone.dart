@@ -76,11 +76,12 @@ class DropzoneGroup extends Group {
     
     List<StreamSubscription> subs = new List<StreamSubscription>();
     
-    // Install both native and emulated dropzones. This is to support 
-    // dropping of SVG elements.
+    // Install both native and emulated dropzones in all browsers. Emulated 
+    // dropzone is used to support dropping of SVG elements, touch events, 
+    // general drag and drop support in IE9 and for custom drag images in IE10.
     _logger.finest('installing as dropzone');
-    _logger.finest('installing as emulated dropzone');
     subs.addAll(_installDropzone(element, this));
+    _logger.finest('installing as emulated dropzone');
     subs.addAll(_installEmulatedDropzone(element, this));
     
     installedElements[element].addAll(subs);
