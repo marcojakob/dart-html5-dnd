@@ -1,0 +1,23 @@
+#draggable-div {
+  width: 100px;
+  height: 100px;
+  background-color: yellow;
+}
+
+#div-dropzone {
+  width: 200px;
+  height: 100px;
+  background-color: grey;
+}
+
+#div-dropzone.dnd-over {
+  background-color: green;
+}
+
+#svg-dropzone.dnd-over rect {
+  fill: green;
+}
+
+#drop-within-svg.dnd-over {
+  fill: green; 
+}

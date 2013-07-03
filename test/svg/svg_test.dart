@@ -16,11 +16,12 @@ main() {
   Logger.root.onRecord.listen(new PrintHandler().call);
   Logger.root.level = Level.FINEST;
   
-  installDragAndDrop();
+  installSvg();
+  installSvgWithin();
 }
 
-void installDragAndDrop() {
-  var svgDrag = new DraggableGroup(
+void installSvg() {
+  var svgDragGroup = new DraggableGroup(
       dragImageFunction: (Element draggable) {
         var element = new svg.SvgElement.tag('svg')
             ..attributes = {
@@ -30,14 +31,34 @@ void installDragAndDrop() {
             ..append(draggable.clone(true));
         return new DragImage(element, 0, 0);
       }
-  );
-  svgDrag.install(query("#svgRect"));
+  )
+  ..install(query('#draggable-svg'));
   
-  var divDrag = new DraggableGroup();
-  divDrag.install(query("#div"));
+  var divDragGroup = new DraggableGroup()
+  ..install(query('#draggable-div'));
   
-  var drop = new DropzoneGroup();
-  drop.installAll(queryAll(".dropzone"));
-  drop.accept.add(svgDrag);
-  drop.accept.add(divDrag);
+  new DropzoneGroup()
+  ..install(query('#svg-dropzone'))
+  ..install(query('#div-dropzone'))
+  ..accept.add(svgDragGroup)
+  ..accept.add(divDragGroup);
+}
+
+void installSvgWithin() {
+  var svgDragGroup = new DraggableGroup(
+      dragImageFunction: (Element draggable) {
+        var element = new svg.SvgElement.tag('svg')
+            ..attributes = {
+                            'width': '100',
+                            'height': '100'
+            }
+            ..append(draggable.clone(true));
+        return new DragImage(element, 0, 0);
+      }
+  )
+  ..install(query('#drag-within-svg'));
+  
+  new DropzoneGroup()
+  ..install(query('#drop-within-svg'))
+  ..accept.add(svgDragGroup);
 }
