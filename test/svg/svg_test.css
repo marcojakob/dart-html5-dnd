@@ -21,3 +21,11 @@
 #drop-within-svg.dnd-over {
   fill: green; 
 }
+
+.draggable {
+  cursor: move;  
+}
+
+.dnd-dragging {
+  opacity: 0.5;
+}

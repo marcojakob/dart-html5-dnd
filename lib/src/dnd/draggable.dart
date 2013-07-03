@@ -382,9 +382,6 @@ class DraggableEvent {
  * A drag feedback image. 
  */
 class DragImage {
-  /// A small transparent gif.
-  static const String EMPTY = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
-  
   Element element;
   int x;
   int y;
@@ -404,7 +401,8 @@ class DragImage {
   
   /**
    * Constructor to create a [DragImage] for the [draggable]. [draggable]
-   * must be visible in the DOM.
+   * must be visible in the DOM. This is used for browsers that do not natively 
+   * support creating such an image.
    * 
    * [mousePosition] is the mouse coordinate relative to the whole document 
    * (usually the event's page property).
@@ -419,11 +417,22 @@ class DragImage {
     if (draggable is ImageElement) {
       element = new ImageElement(src: draggable.src, 
           width: draggable.width, height: draggable.height);
+    } else if (draggable is svg.SvgSvgElement) {
+      // Is a root <svg> element --> we can just clone it.
+      element = draggable.clone(true);     
+      element.style.pointerEvents = 'none';
+    } else if (draggable is svg.SvgElement) {
+      // Is a child of an <svg> element --> wrap it in an <svg>.
+      element = new svg.SvgElement.tag('svg')
+      ..attributes['width'] = draggable.getBoundingClientRect().width.toString()
+      ..attributes['height'] = draggable.getBoundingClientRect().height.toString()
+      ..append(draggable.clone(true));
+      element.style.pointerEvents = 'none';
     } else {
       element = draggable.clone(true);
-      element.attributes.remove('id');
       element.style.width = draggable.getComputedStyle().width;
       element.style.height = draggable.getComputedStyle().height;
+      print('background: ${element.style.background}');
     }
     
     // Add some transparency like browsers would do for native dragging.

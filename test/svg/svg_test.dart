@@ -21,17 +21,7 @@ main() {
 }
 
 void installSvg() {
-  var svgDragGroup = new DraggableGroup(
-      dragImageFunction: (Element draggable) {
-        var element = new svg.SvgElement.tag('svg')
-            ..attributes = {
-                            'width': '100',
-                            'height': '100'
-            }
-            ..append(draggable.clone(true));
-        return new DragImage(element, 0, 0);
-      }
-  )
+  var svgDragGroup = new DraggableGroup()
   ..install(query('#draggable-svg'));
   
   var divDragGroup = new DraggableGroup()
@@ -45,17 +35,7 @@ void installSvg() {
 }
 
 void installSvgWithin() {
-  var svgDragGroup = new DraggableGroup(
-      dragImageFunction: (Element draggable) {
-        var element = new svg.SvgElement.tag('svg')
-            ..attributes = {
-                            'width': '100',
-                            'height': '100'
-            }
-            ..append(draggable.clone(true));
-        return new DragImage(element, 0, 0);
-      }
-  )
+  var svgDragGroup = new DraggableGroup()
   ..install(query('#drag-within-svg'));
   
   new DropzoneGroup()
