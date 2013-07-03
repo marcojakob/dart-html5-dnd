@@ -151,7 +151,7 @@ class DraggableGroup extends Group {
     
     List<StreamSubscription> subs = new List<StreamSubscription>();
     
-    if (_emulateDraggable) {
+    if (_emulateDraggable || element is svg.SvgElement) {
       _logger.finest('installing as emulated draggable');
       subs.addAll(_installEmulatedDraggable(element, this));
     } else {
@@ -442,8 +442,17 @@ class DragImage {
   void _addEmulatedDragImage(Element draggable) {
     _logger.finest('Adding emulated drag image.');
     
+    var parent = draggable.parentNode;
+    
+    // Walk parents until we find a non-SVG element. This is to handle cases
+    // where we're dragging a node within an SVG document.
+    while (parent is svg.SvgElement) {
+      parent = parent.parentNode;
+    }
+    
     // Add the drag image with absolute position.
-    draggable.parent.children.add(element);
+    parent.append(element);
+    
     element.style.position = 'absolute';
     element.style.visibility = 'hidden';
   }
@@ -468,4 +477,14 @@ class DragImage {
     element.style.top = '${(newMousePagePosition.y - this.y)}px';
     element.style.visibility = 'visible';
   }
+  
+  bool _contains(EventTarget target) {
+    // If the drag image is an SvgElement, we need to do contains() differently.
+    // IE9 does not support the contains() method on SVG elements.
+    return element is svg.SvgElement ? _svgContains(element, target) : element.contains(target);
+  }
+}
+
+bool _svgContains(Element element, EventTarget target) {
+  return (target == element) ? true : element.children.any((e) => _svgContains(e, target));
 }
