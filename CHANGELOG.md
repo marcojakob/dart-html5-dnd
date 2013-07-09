@@ -1,24 +1,28 @@
 Changelog
 ================
 
-## Version 0.1.0 (2013-06-05) ##
-* First Version.
+## Version 0.3.3 (2013-07-??) ##
+* Support dragging of SVG elements (Issue #7). Dragging of SVG elements uses the 
+  emulated mode in all browsers.
+* Add tests for dragging SVG elements.
 
-## Version 0.2.0 (2013-06-10) ##
-* Changed API to using groups of Draggables/Dropzones/Sortables. Now options 
-  and event listeners are set on a group instead of individual elements.
-* Ability to install/uninstall elements. Adds/Removes event subscriptions on 
-  an element.
-* SortableEvent now carries information about the original group of the 
-  dragged element and the new group it was dragged to. This enables 
-  uninstalling in the previous group and installing in the new group.
-* Other minor improvements in Sortable.
-
-## Version 0.2.1 (2013-06-17) ##
-* Fix Issue #6: Bug in Firefox when dragging over nested elements
-* Fix Issue #1: overClass (.dnd-over) stays after drag ended
-* Fix Issue #4: Support any HTML Element as drag image
-* Fix Issue #5: Always use Drag Image Polyfill for IE9 drags
+## Version 0.3.2 (2013-06-28) ##
+* Support 'cancel' query String to prevent dragging: A 'cancel' query String 
+  may be supplied for draggables to prevent starting a drag on specific elements.
+* Improve clearing of selection when drag starts.
+* Fix some bugs in touch support.
+* Firing sortUpdate events after dragEnd events: Firing sortUpdate at the end 
+  makes sure that the listener of update events can uninstall/install involved 
+  draggables without side-effects
+* Add some additional test examples.
+  
+## Version 0.3.1 (2013-06-26) ##
+* Touch Event support (Issue #3): Uses touchStart, touchMove, and touchEnd 
+  events to emulate HTML5 drag and drop behaviour.
+* Reorganized some parts. Now only html5_dnd.dart needs to be imported and 
+  sortable is imported automatically. If some functionality like sortable isn't 
+  used, Dart's treeshaking will make sure no unnecessary code is added.
+* Add extended usage documentation to readme.
 
 ## Version 0.3.0 (2013-06-25) ##
 * Completely emulating drag and drop in IE9 and partly in IE10 (when custom drag
@@ -35,21 +39,22 @@ Changelog
   dragOverElements in a list, the related target of the event is used to
   determine if it is an event that happened on the main element or bubbled
   up from child elements.
-  
-## Version 0.3.1 (2013-06-26) ##
-* Touch Event support (Issue #3): Uses touchStart, touchMove, and touchEnd 
-  events to emulate HTML5 drag and drop behaviour.
-* Reorganized some parts. Now only html5_dnd.dart needs to be imported and 
-  sortable is imported automatically. If some functionality like sortable isn't 
-  used, Dart's treeshaking will make sure no unnecessary code is added.
-* Add extended usage documentation to readme.
 
-## Version 0.3.2 (2013-06-28) ##
-* Support 'cancel' query String to prevent dragging: A 'cancel' query String 
-  may be supplied for draggables to prevent starting a drag on specific elements.
-* Improve clearing of selection when drag starts.
-* Fix some bugs in touch support.
-* Firing sortUpdate events after dragEnd events: Firing sortUpdate at the end 
-  makes sure that the listener of update events can uninstall/install involved 
-  draggables without side-effects
-* Add some additional test examples.
+## Version 0.2.1 (2013-06-17) ##
+* Fix Issue #6: Bug in Firefox when dragging over nested elements
+* Fix Issue #1: overClass (.dnd-over) stays after drag ended
+* Fix Issue #4: Support any HTML Element as drag image
+* Fix Issue #5: Always use Drag Image Polyfill for IE9 drags
+
+## Version 0.2.0 (2013-06-10) ##
+* Changed API to using groups of Draggables/Dropzones/Sortables. Now options 
+  and event listeners are set on a group instead of individual elements.
+* Ability to install/uninstall elements. Adds/Removes event subscriptions on 
+  an element.
+* SortableEvent now carries information about the original group of the 
+  dragged element and the new group it was dragged to. This enables 
+  uninstalling in the previous group and installing in the new group.
+* Other minor improvements in Sortable.
+
+## Version 0.1.0 (2013-06-05) ##
+* First Version.
