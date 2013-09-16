@@ -1,0 +1,35 @@
+.dnd-over {
+  border: 2px dashed #000;
+}
+
+.dnd-dragging {
+  opacity: 0.5;
+}
+
+div {
+  display: block;
+  color: #1C94C4;
+  border: 1px solid #CCC;
+}
+
+.container {
+  background: #F6F6F6;
+  width: 200px;
+  height: 150px;
+}
+
+.child {
+  margin: 35px;
+  background: #A9A9A9;
+  width: 125px;
+  height: 50px;
+}
+
+.draggable1, .draggable2 {
+  cursor: move;
+  margin: 35px;
+  background: #123456;
+  width: 125px;
+  height: 50px;
+}
+
