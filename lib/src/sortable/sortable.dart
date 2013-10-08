@@ -6,7 +6,6 @@ library html5_dnd.sortable;
 
 import 'dart:html';
 import 'dart:async';
-import 'package:meta/meta.dart';
 import 'package:logging/logging.dart';
 
 import '../../html5_dnd.dart';
@@ -127,7 +126,6 @@ class SortableGroup extends DraggableGroup implements DropzoneGroup {
   /**
    * Installs sortable behaviour on [element] and registers it in this group.
    */
-  @override
   void install(Element element) {
     _logger.finest('installing as sortable');
     // Sortable elements are at the same time draggables (superclass) and dropzones.
@@ -232,7 +230,6 @@ class Position {
     parent.children.insert(index, element);
   }
 
-  @override
   int get hashCode {
     int result = 17;
     result = 37 * result + parent.hashCode;
@@ -240,7 +237,6 @@ class Position {
     return result;
   }
 
-  @override
   bool operator ==(other) {
     if (identical(other, this)) return true;
     return (other is Position

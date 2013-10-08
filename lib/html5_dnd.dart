@@ -8,12 +8,10 @@ import 'dart:html';
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:svg' as svg;
-import 'package:meta/meta.dart';
 import 'package:logging/logging.dart';
 
 import 'src/utils.dart' as utils;
 
-import 'src/sortable/sortable.dart';
 export 'src/sortable/sortable.dart';
 
 part 'src/dnd/group.dart';

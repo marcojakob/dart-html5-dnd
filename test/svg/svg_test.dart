@@ -4,7 +4,6 @@
 library svt_test;
 
 import 'dart:html';
-import 'dart:svg' as svg;
 
 import 'package:logging_handlers/logging_handlers_shared.dart';
 import 'package:logging/logging.dart';

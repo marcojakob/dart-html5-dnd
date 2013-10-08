@@ -31,7 +31,9 @@ int getElementIndexInParent(Element element) {
 void clearTextSelections() {
   window.getSelection().removeAllRanges();
   var activeElement = document.activeElement;
-  if (activeElement is TextAreaElement || activeElement is InputElement) {
+  if (activeElement is TextAreaElement) {
+    activeElement.setSelectionRange(0, 0);
+  } else if (activeElement is InputElement) {
     activeElement.setSelectionRange(0, 0);
   }
 }

@@ -1,7 +1,12 @@
 Changelog
 ================
 
-## Version 0.3.3 (2013-07-??) ##
+## Version 0.3.4 (2013-10-08) ##
+* Fix Issue #13: html5_dnd is incompatible with js-interop and the latest SDK
+  * Remove dependencies on meta package
+  * Add version constraints on dependencies
+
+## Version 0.3.3 (2013-07-09) ##
 * Support dragging of SVG elements (Issue #7). Dragging of SVG elements uses the 
   emulated mode in all browsers.
 * Add tests for dragging SVG elements.
