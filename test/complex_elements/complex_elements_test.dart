@@ -5,17 +5,28 @@ library complex_elements_test;
 
 import 'dart:html';
 
-import 'package:logging_handlers/logging_handlers_shared.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:html5_dnd/html5_dnd.dart';
 
 final _logger = new Logger("complex_elements_test");
 
 main() {
-  Logger.root.onRecord.listen(new PrintHandler().call);
-  Logger.root.level = Level.FINEST;
+  initLogging();
   
   installDragAndDrop();
+}
+
+initLogging() {
+  DateFormat dateFormat = new DateFormat('yyyy.mm.dd HH:mm:ss.SSS');
+  
+  // Print output to console.
+  Logger.root.onRecord.listen((LogRecord r) {
+    print('${dateFormat.format(r.time)}\t${r.loggerName}\t[${r.level.name}]:\t${r.message}');
+  });
+  
+  // Root logger level.
+  Logger.root.level = Level.FINEST;
 }
 
 void installDragAndDrop() {

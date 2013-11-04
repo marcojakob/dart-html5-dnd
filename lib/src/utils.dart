@@ -69,7 +69,7 @@ bool _svgContains(svg.SvgElement node, Node otherNode) {
  * Get the offset of [element] relative to the document.
  */
 Point pageOffset(Element element) {
-  Rect rect = element.getBoundingClientRect();
+  Rectangle rect = element.getBoundingClientRect();
   return new Point(
       rect.left + window.pageXOffset - document.documentElement.client.left, 
       rect.top + window.pageYOffset - document.documentElement.client.top);

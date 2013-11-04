@@ -2,15 +2,13 @@ library html5_dnd_example;
 
 import 'dart:html';
 
-import 'dart:async';
-import 'package:logging_handlers/logging_handlers_shared.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:html5_dnd/html5_dnd.dart';
 
 main() {
   // Uncomment to enable logging.
-//  Logger.root.onRecord.listen(new PrintHandler().call);
-//  Logger.root.level = Level.FINEST;
+  initLogging();
   
   // Install Drag and Drop examples.
   sectionDraggableAndDropzone();
@@ -28,6 +26,18 @@ main() {
 
   // Used for the code examples on the blog website.
 //  _installCodeblockTabs();
+}
+
+initLogging() {
+  DateFormat dateFormat = new DateFormat('yyyy.mm.dd HH:mm:ss.SSS');
+  
+  // Print output to console.
+  Logger.root.onRecord.listen((LogRecord r) {
+    print('${dateFormat.format(r.time)}\t${r.loggerName}\t[${r.level.name}]:\t${r.message}');
+  });
+  
+  // Root logger level.
+  Logger.root.level = Level.FINEST;
 }
 
   
