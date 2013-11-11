@@ -31,7 +31,7 @@ initLogging() {
 
 void installDragAndDrop() {
   SortableGroup sortGroup = new SortableGroup()
-  ..installAll(queryAll('.group'))
+  ..installAll(querySelectorAll('.group'))
   ..onSortUpdate.listen((SortableEvent event) {
     int originalIndex = event.originalPosition.index;
     int newIndex = event.newPosition.index;

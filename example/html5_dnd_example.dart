@@ -44,11 +44,11 @@ initLogging() {
 sectionDraggableAndDropzone() {
   // Install draggables (documents).
   DraggableGroup dragGroup = new DraggableGroup()
-  ..installAll(queryAll('#draggable-dropzone .document'));
+  ..installAll(querySelectorAll('#draggable-dropzone .document'));
   
   // Install dropzone (trash).
   DropzoneGroup dropGroup = new DropzoneGroup()
-  ..install(query('#draggable-dropzone .trash'))
+  ..install(querySelector('#draggable-dropzone .trash'))
   ..accept.add(dragGroup)
   ..onDrop.listen((DropzoneEvent event) {
     event.draggable.remove();
@@ -59,11 +59,11 @@ sectionDraggableAndDropzone() {
 sectionDraggingDivs() {
   // Install draggable.
   DraggableGroup dragGroup = new DraggableGroup()
-  ..installAll(queryAll('#dragging-divs .dragme'));
+  ..install(querySelector('#dragging-divs .dragme'));
   
   // Install dropzone.
   DropzoneGroup dropGroup = new DropzoneGroup()
-  ..install(query('#dragging-divs .dropzone'))
+  ..install(querySelector('#dragging-divs .dropzone'))
   ..accept.add(dragGroup);
 }
 
@@ -71,23 +71,23 @@ sectionDropEffects() {
   // Install draggables.
   DraggableGroup dragGroupMove = new DraggableGroup()
   ..dropEffect = DROP_EFFECT_MOVE
-  ..install(query('#drop-effects .move'));
+  ..install(querySelector('#drop-effects .move'));
   
   DraggableGroup dragGroupCopy = new DraggableGroup()
   ..dropEffect = DROP_EFFECT_COPY
-  ..install(query('#drop-effects .copy'));
+  ..install(querySelector('#drop-effects .copy'));
   
   DraggableGroup dragGroupLink = new DraggableGroup()
   ..dropEffect = DROP_EFFECT_LINK
-  ..install(query('#drop-effects .link'));
+  ..install(querySelector('#drop-effects .link'));
   
   DraggableGroup dragGroupNone = new DraggableGroup()
   ..dropEffect = DROP_EFFECT_NONE
-  ..install(query('#drop-effects .none'));
+  ..install(querySelector('#drop-effects .none'));
   
   // Install dropzone.
   DropzoneGroup dropGroup = new DropzoneGroup()
-  ..install(query('#drop-effects .trash'))
+  ..install(querySelector('#drop-effects .trash'))
   ..accept.addAll([dragGroupMove, dragGroupCopy, dragGroupLink, dragGroupNone])
   ..onDrop.listen((DropzoneEvent event) {
     event.draggable.remove();
@@ -108,25 +108,25 @@ sectionDragImages() {
   // Install draggables.
   DraggableGroup dragGroupOne = new DraggableGroup(
       dragImageFunction: (Element draggable) => new DragImage(png, 40, 40))
-  ..install(query('#drag-images .one'));
+  ..install(querySelector('#drag-images .one'));
   
   DraggableGroup dragGroupTwo = new DraggableGroup(
       dragImageFunction: (Element draggable) => new DragImage(png, -20, -20))
-  ..install(query('#drag-images .two'));
+  ..install(querySelector('#drag-images .two'));
   
   DraggableGroup dragGroupThree = new DraggableGroup(
       dragImageFunction: (Element draggable) => new DragImage(canvasImage, 20, 20))
-  ..install(query('#drag-images .three'));
+  ..install(querySelector('#drag-images .three'));
   
   // Install dropzone.
   DropzoneGroup dropGroup = new DropzoneGroup()
-  ..install(query('#drag-images .dropzone'))
+  ..install(querySelector('#drag-images .dropzone'))
   ..accept.addAll([dragGroupOne, dragGroupTwo, dragGroupThree]);
 }
 
 sectionNestedElements() {
-  TextAreaElement textarea = query('#nested-elements .dropzone textarea');
-  InputElement input = query('#nested-elements .dropzone input');
+  TextAreaElement textarea = querySelector('#nested-elements .dropzone textarea');
+  InputElement input = querySelector('#nested-elements .dropzone input');
   input.value = 'Drag here!';
   textarea.text = '';
   int enterLeaveCounter = 1;
@@ -134,11 +134,11 @@ sectionNestedElements() {
   
   // Install draggables.
   DraggableGroup dragGroup = new DraggableGroup()
-  ..install(query('#nested-elements .dragme'));
+  ..install(querySelector('#nested-elements .dragme'));
   
   // Install dropzone.
   DropzoneGroup dropGroup = new DropzoneGroup()
-  ..install(query('#nested-elements .dropzone'))
+  ..install(querySelector('#nested-elements .dropzone'))
   ..accept.add(dragGroup)
   ..onDragEnter.listen((DropzoneEvent event) {
     textarea.appendText('${enterLeaveCounter++} drag enter fired\n');
@@ -159,7 +159,7 @@ sectionNestedElements() {
 
 sectionSortableList() {
   SortableGroup sortGroup = new SortableGroup()
-  ..installAll(queryAll('#sortable-list li'))
+  ..installAll(querySelectorAll('#sortable-list li'))
   ..onSortUpdate.listen((SortableEvent event) {
     // do something when user sorted the elements...
   });
@@ -171,7 +171,7 @@ sectionSortableList() {
 sectionSortableGrid() {
   SortableGroup sortGroup = new SortableGroup()
   ..isGrid = true
-  ..installAll(queryAll('#sortable-grid li'));
+  ..installAll(querySelectorAll('#sortable-grid li'));
   
   // Only accept elements from this section.
   sortGroup.accept.add(sortGroup);
@@ -179,7 +179,7 @@ sectionSortableGrid() {
 
 sectionSortableListHandles() {
   SortableGroup sortGroup = new SortableGroup(handle: 'span')
-  ..installAll(queryAll('#sortable-list-handles li'));
+  ..installAll(querySelectorAll('#sortable-list-handles li'));
   
   // Only accept elements from this section.
   sortGroup.accept.add(sortGroup);
@@ -189,14 +189,14 @@ sectionCancelDrag() {
   // Install draggable.
   DraggableGroup dragGroup = new DraggableGroup(
       cancel: 'textarea, button, .nodrag')
-  ..install(query('#cancel-drag .dragme'));
+  ..install(querySelector('#cancel-drag .dragme'));
 }
 
 sectionSortableTwoGroups() {
   ImageElement png = new ImageElement(src: 'icons/smiley-happy.png');
   
   SortableGroup sortGroup1 = new SortableGroup()
-  ..installAll(queryAll('#sortable-two-groups .group1 li'))
+  ..installAll(querySelectorAll('#sortable-two-groups .group1 li'))
   ..onSortUpdate.listen((SortableEvent event) {
     event.originalGroup.uninstall(event.draggable);
     event.newGroup.install(event.draggable);
@@ -204,7 +204,7 @@ sectionSortableTwoGroups() {
   
   SortableGroup sortGroup2 = new SortableGroup(
       dragImageFunction: (Element draggable) => new DragImage(png, 5, 5))
-  ..installAll(queryAll('#sortable-two-groups .group2 li'))
+  ..installAll(querySelectorAll('#sortable-two-groups .group2 li'))
   ..onSortUpdate.listen((SortableEvent event) {
     if (event.originalGroup != event.newGroup) {
       event.originalGroup.uninstall(event.draggable);
@@ -219,7 +219,7 @@ sectionSortableTwoGroups() {
 
 
 _installCodeblockTabs() {
-  List<AnchorElement> tabLinks = queryAll('.example-code .menu li a');
+  List<AnchorElement> tabLinks = querySelectorAll('.example-code .menu li a');
   for (AnchorElement link in tabLinks) {
     link.onClick.listen((MouseEvent event) {
       event.preventDefault();
@@ -227,14 +227,14 @@ _installCodeblockTabs() {
       Element exampleCodeParent = link.parent.parent.parent;
       
       // Remove active class on all menu and content tabs.
-      exampleCodeParent.queryAll('[tab]').forEach((Element e) {
+      exampleCodeParent.querySelectorAll('[tab]').forEach((Element e) {
         e.classes.remove('active');
       });
 
       // Add active class.
       String currentTab = link.attributes['tab'];
       link.classes.add('active');
-      exampleCodeParent.query('.content [tab="$currentTab"]').classes.add('active');
+      exampleCodeParent.querySelector('.content [tab="$currentTab"]').classes.add('active');
     });  
   }
 }

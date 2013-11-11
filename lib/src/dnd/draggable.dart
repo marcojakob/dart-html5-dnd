@@ -345,14 +345,14 @@ List<StreamSubscription> _installDraggable(Element element, DraggableGroup group
 bool _isValidDragStartTarget(Element element, EventTarget target, 
                              String handle, String cancel) {
   if (handle != null) {
-    List<Element> handles = element.queryAll(handle);
+    List<Element> handles = element.querySelectorAll(handle);
     if (!handles.contains(target)) {
       return false;
     }
   }
   
   if (cancel != null) {
-    List<Element> cancels = element.queryAll(cancel);
+    List<Element> cancels = element.querySelectorAll(cancel);
     if (cancels.contains(target)) {
       return false;
     }

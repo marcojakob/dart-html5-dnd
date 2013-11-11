@@ -32,23 +32,23 @@ initLogging() {
 
 void installSvg() {
   var svgDragGroup = new DraggableGroup()
-  ..install(query('#draggable-svg'));
+  ..install(querySelector('#draggable-svg'));
   
   var divDragGroup = new DraggableGroup()
-  ..install(query('#draggable-div'));
+  ..install(querySelector('#draggable-div'));
   
   new DropzoneGroup()
-  ..install(query('#svg-dropzone'))
-  ..install(query('#div-dropzone'))
+  ..install(querySelector('#svg-dropzone'))
+  ..install(querySelector('#div-dropzone'))
   ..accept.add(svgDragGroup)
   ..accept.add(divDragGroup);
 }
 
 void installSvgWithin() {
   var svgDragGroup = new DraggableGroup()
-  ..install(query('#drag-within-svg'));
+  ..install(querySelector('#drag-within-svg'));
   
   new DropzoneGroup()
-  ..install(query('#drop-within-svg'))
+  ..install(querySelector('#drop-within-svg'))
   ..accept.add(svgDragGroup);
 }

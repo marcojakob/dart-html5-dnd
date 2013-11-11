@@ -1,6 +1,9 @@
 Changelog
 ================
 
+## Version 0.3.5 (2013-11-11) ##
+* Update to dart libraries 0.9.0.
+
 ## Version 0.3.4 (2013-10-08) ##
 * Fix Issue #13: html5_dnd is incompatible with js-interop and the latest SDK
   * Remove dependencies on meta package

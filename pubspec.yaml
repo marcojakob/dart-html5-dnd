@@ -1,11 +1,11 @@
 name: html5_dnd
-version: 0.3.4+1
+version: 0.3.5
 author: Marco Jakob <majakob@gmx.ch>
 description: HTML5 Drag and Drop
 homepage: https://github.com/marcojakob/dart-html5-dnd
 documentation: http://edu.makery.ch/projects/dart-html5-drag-and-drop
 dependencies:
-  logging: '>=0.7.6'
+  logging: '>=0.9.0 <0.10.0'
 dev_dependencies:
-  browser: '>=0.7.6'
-  intl: any
+  browser: '>=0.9.0 <0.10.0'
+  intl: '>=0.9.0 <0.10.0'

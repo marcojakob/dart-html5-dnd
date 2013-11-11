@@ -28,7 +28,7 @@ initLogging() {
 
 void installDragAndDrop() {
   SortableGroup groupA = new SortableGroup()
-  ..installAll(queryAll('#group-a-sort li'))
+  ..installAll(querySelectorAll('#group-a-sort li'))
   ..forcePlaceholderSize = false
   ..onSortUpdate.listen((SortableEvent event) {
     if (event.originalGroup != event.newGroup) {
@@ -38,7 +38,7 @@ void installDragAndDrop() {
   });
   
   SortableGroup groupB = new SortableGroup()
-  ..installAll(queryAll('#group-b-sort li'))
+  ..installAll(querySelectorAll('#group-b-sort li'))
   ..forcePlaceholderSize = false
   ..onSortUpdate.listen((SortableEvent event) {
     if (event.originalGroup != event.newGroup) {
@@ -48,7 +48,7 @@ void installDragAndDrop() {
   });
   
   DraggableGroup groupC = new DraggableGroup()
-  ..installAll(queryAll('#group-c-drag li'));
+  ..installAll(querySelectorAll('#group-c-drag li'));
   
   groupA.accept.add(groupB);
   groupB.accept.addAll([groupA, groupB, groupC]);
