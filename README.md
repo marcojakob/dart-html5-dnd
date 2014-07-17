@@ -2,7 +2,7 @@
 
 ***
 
-### Note: This library is not maintained any more.
+## Note: This library is not maintained any more.
 
 * Use the [Dart drag and drop](http://code.makery.ch/library/dart-drag-and-drop/) library instead (better, without HTML5).
 * Read the details about why I chose [Drag and Drop without HTML5](http://code.makery.ch/blog/drag-and-drop-without-html5/)
@@ -10,9 +10,8 @@
 ***
 
 
+## Deprecated stuff...
 
-
-Helper library to simplify **HTML5 Drag and Drop** in Dart.
 
 ## Features
 
