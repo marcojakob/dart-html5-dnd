@@ -1,9 +1,21 @@
-HTML5 Drag and Drop for Dart
-================
+# HTML5 Drag and Drop for Dart
+
+***
+
+### Note: This library is not maintained any more.
+
+* Use the [Dart drag and drop](http://code.makery.ch/library/dart-drag-and-drop/) library instead (better, without HTML5).
+* Read the details about why I chose [Drag and Drop without HTML5](http://code.makery.ch/blog/drag-and-drop-without-html5/)
+
+***
+
+
+
 
 Helper library to simplify **HTML5 Drag and Drop** in Dart.
 
-## Features ##
+## Features
+
 * Make any HTML Element `draggable`.
 * Create `dropzones` and connect them with `draggables`.
 * Rearrange elements with `sortables` (similar to jQuery UI Sortable).
@@ -14,33 +26,9 @@ Helper library to simplify **HTML5 Drag and Drop** in Dart.
   This is the case for IE9 and partly for IE10 (when custom drag images are 
   used).
 
-## Demo ##
-See [HTML5 Drag and Drop in action](http://edu.makery.ch/projects/dart-html5-drag-and-drop)
-(with code examples).
 
-[![Drag and Drop Example](https://raw.github.com/marcojakob/dart-html5-dnd/master/doc/dnd-example.png)](http://edu.makery.ch/projects/dart-html5-drag-and-drop)
+## Usage
 
-All examples are also available in the `example` directory on GitHub.
-
-## Installation ##
-
-### Add Dependency ###
-Add the folowing to your **pubspec.yaml** and run **pub install**
-```yaml
-	dependencies:
-	  html5_dnd: any
-```
-
-### Import ###
-Import the `html5_dnd` library in your Dart code.
-
-```dart
-import 'package:html5_dnd/html5_dnd.dart';
-
-// ...
-```
-
-## Usage ##
 See the demo page above or the `example` directory to see some live examples 
 with code.
 
@@ -54,14 +42,16 @@ elements in a `SortableGroup`. The `SortableGroup` will make the installed
 elements both into draggables and dropzones and thus creates sortable behaviour.
 
 
-### Disable Touch Support ###
+### Disable Touch Support
+
 There is a global property called `enableTouchEvents` which is `true` by 
 default. This means that touch events are automatically enabled on devices that 
 support it. If touch support should not be used even on touch devices, set this 
 flag to `false`. 
 
 
-### Draggables ###
+### Draggables
+
 Any HTML element can be made draggable. First we'll have to create a 
 `DraggableGroup` that manages draggable elements. The `DraggableGroup` holds
 all options for dragging and provides event streams we can listen to.
@@ -78,7 +68,9 @@ dragGroup.installAll(queryAll('.my-draggables'));
 With `uninstall(...)` or `uninstallAll(...)` draggables can be removed from 
 the group and the draggable behaviour is uninstalled.
 
-#### Draggable Options ####
+
+#### Draggable Options
+
 The `DraggableGroup` has three constructor options:
 
 * The `dragImageFunction` is used to provide a custom `DragImage`. If no 
@@ -128,7 +120,8 @@ dragGroup.overClass = 'dnd-over';
 dragGroup.dropEffect = DROP_EFFECT_COPY; 
 ```
 
-#### Draggable Events ####
+#### Draggable Events
+
 We can listen to `dragStart`, `drag`, and `dragEnd` events of a 
 `DraggableGroup`.
 
@@ -141,7 +134,8 @@ dragGroup.onDragEnd.listen((DraggableEvent event) => print('drag ended'));
 ```
 
 
-### Dropzones ###
+### Dropzones
+
 Any HTML element can be made to a dropzone. Similar to how draggables are 
 created, we create a dropzones:
 
@@ -151,7 +145,8 @@ DropzoneGroup dropGroup = new DropzoneGroup();
 dropGroup.installAll(queryAll('.my-dropzones'));
 ```
 
-#### Dropzone Options ####
+#### Dropzone Options
+
 The `DropzoneGroup` has an option to specify which `DraggableGroup`s it accepts.
 If no accept group is specified, the `DropzoneGroup` will accept all draggables.
 
@@ -166,7 +161,8 @@ DropzoneGroup dropGroup = new DropzoneGroup();
 dropGroup.accept.add(dragGroup);
 ```
 
-#### Dropzone Events ####
+#### Dropzone Events
+
 We can listen to `dragEnter`, `dragOver`, `dragLeave`, and `drop` events of a 
 `DropzoneGroup`.
 
@@ -180,7 +176,8 @@ dropGroup.onDrop.listen((DropzoneEvent event) => print('dropped inside'));
 ```
 
 
-### Sortables ###
+### Sortables
+
 For reordering of HTML elements we can use sortables. 
 
 ```dart
@@ -193,7 +190,9 @@ Note: All sortables are at the same time draggables and dropzones. This means
 we can set all options of `DraggableGroup` and `DropzoneGroup` on sortables and
 listen to all their events.
 
-#### Sortable Options ####
+
+#### Sortable Options
+
 In addition to the inherited `DraggableGroup` and `DropzoneGroup` options, 
 `SortableGroup` has the following options:
 
@@ -211,7 +210,8 @@ sortGroup.forcePlaceholderSize = true;
 sortGroup.isGrid = false;
 ```
 
-#### Sortable Events ####
+#### Sortable Events
+
 Next to the inherited `DraggableGroup` and `DropzoneGroup` events 
 `SortableGroup` has one additional event:
 
@@ -222,7 +222,8 @@ sortGroup.onSortUpdate.listen((SortableEvent event) => print('elements were sort
 ```
 
 
-## Thanks and Contributions ##
+## Thanks and Contributions
+
 I'd like to thank the people who kindly helped me with their answers or put 
 some tutorial or code examples online. They've indirectly contributed to this 
 project.
@@ -233,5 +234,6 @@ If you'd like to contribute, you're welcome to report issues or
 
 
 
-## License ##
+## License
+
 The MIT License (MIT)
